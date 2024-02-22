@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, session
-import pyodbc
 import pandas as pd
 import warnings
 from functools import wraps
@@ -441,6 +440,19 @@ def searchByDate():
     
     return render_template('searchByDate.html')
 
+@app.route('/searchByYear', methods=['GET', 'POST'])
+@login_required
+def searchByYear():
+    # if request.method == 'POST':
+    #     # Access the form data:
+    #     year = request.form['year']
+    #     button_pressed = request.form['search']
+    #     if button_pressed == 'summary':
+    #         return preYearSummary(year)
+    #     else: # button_pressed == 'recap'
+    #         return preYearRecap(year)
+    return render_template('searchByYear.html')
+
 @app.route('/')
 def home():
     return redirect(url_for('login'))
@@ -486,3 +498,7 @@ def editTitle():
             return preSingleDate(old_date)
         else:
             return preMonthDetail(old_date.month, old_date.year)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
