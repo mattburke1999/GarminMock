@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Activities</title>
+        <link rel="stylesheet" type="text/css" href="../static/css/multipleActivity.css">
+        <script>
+            function toggleCollapse(className, button, buttonText, icon) {
+                var container = button.parentElement;
+                var elements = container.querySelectorAll('.' + className);
+                var icons = icon ? container.querySelector('#' + icon) : null;
+                for (var i = 0; i < elements.length; i++) {
+                    if (elements[i].style.display === "none") {
+                        if (buttonText === ' Stats') {
+                            console.log(buttonText)
+                            elements[i].style.display = "grid";
+                        } else {
+                            elements[i].style.display = "block";
+                            if (icons !== null) {
+                                icons.style.display = "block";
+                            }
+                        }
+                        button.innerHTML = "Hide";
+                        button.style.marginBottom = "10px"
+                    } else {
+                        elements[i].style.display = "none";
+                        button.innerHTML = "View " + buttonText;
+                        button.style.marginBottom = "0px"
+                        if (icon !== null) {
+                            icons.style.display = "none";
+                        }
+                    }
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <div id = 'modalBackdrop' class = 'modal-backdrop'></div>
+        <h1 class ='pageTitle'>Activities for {{date_title}}</h1>
+        {% for activity, lap_html in zip(activity_list, lap_html_list) %}
+            <div class="container">
+                <div class='header'>
+                    <button  id="openModalButton" class = 'openModalButton'>
+                        <img class="header-image" src="../static/images/edit-icon.jpg" alt="Edit icon">
+                    </button>
+                    <div class='topHeader'>
+                        {% if activity['Sport'] == 'Running' %}
+                            <img src="../static/images/running-icon.jpg" alt="Running icon">
+                        {% elif activity['Sport'] == 'Cycling' %}
+                            <img src="../static/images/cycling-icon.png" alt="Running icon">
+                        {% elif activity['Sport'] == 'Rowing' %}
+                            <img src="../static/images/rowing-icon.jpg" alt="Running icon">
+                        {% endif %}
+                        <div>
+                            <h1><span class="date-name">{{activity.Date}}</span></h1>
+                            <h1><span class="sport-name">{{activity.DisplaySport}}</span></h1>
+                        </div>
+                    </div>
+                    <h1><span class="titleName">{{activity['Activity Title']}}</span></h1>
+                    <h3><span class = 'name'>Description:</span> <span class = 'value'>{{activity['Description']}}</span></h3>
+                </div>
+                <div class='times'>
+                    <img class="header-image" src="../static/images/edit-icon.jpg" alt="Edit icon">
+                    <div class='grid-container2'>
+                        <h2><span class="name">Duration:</span> <span class="value">{{activity['Duration']}}</span></h2>
+                        <h2><span class="name">Elapsed Time:</span> <span class="value">{{activity['Elapsed Time']}}</span></h2>
+                        {% if activity['Sport'] == 'Running'%}                
+                            <h2><span class="name">Avg Pace:</span> <span class="value">{{activity['Pace']}} min/mi</span></h2>
+                            <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} min/mi</span></h2>
+                        {% elif activity['Sport'] == 'Cycling'%}
+                            <h2><span class="name">Avg Speed:</span> <span class="value">{{activity['Speed']}} mph</span></h2>
+                            <h2><span class="name">Elapsed Speed:</span> <span class="value">{{activity['Elapsed Speed']}} mph</span></h2>
+                        {% elif activity['Sport'] == 'Rowing'%}
+                            <h2><span class="name">Pace:</span> <span class="value">{{activity['Pace']}} /500m</span></h2>
+                            <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} /500m</span></h2>
+                        {% endif %}
+                        {% if activity['Sport'] in ('Running', 'Cycling')%}
+                            <h2><span class="name">Distance:</span> <span class="value">{{activity['Distance']}} miles</span></h2>
+                        {% elif activity['Sport'] == 'Rowing' %}
+                            <h2><span class="name">Distance:</span> <span class="value">{{activity['Distance']}} m</span></h2>
+                        {% endif %}
+                    </div>
+                </div>
+                <h1><span class="name">Splits</span></h1>
+                <img class="header-image3" style='display:none' id='editicon2' src="../static/images/edit-icon2.jpg" alt="Edit icon">
+                <button type="button" onclick="toggleCollapse('splits', this, ' Splits', 'editicon2')" class='splits-button'>View Splits</button>
+                {% if lap_html is none %}
+                    <div class='splits' style="display:none; height:42px">
+                        <h2>No Split Data to Show</h2>
+                {% else %}
+                    <div class='splits' style="display:none">
+                        {{lap_html|safe}}
+                {% endif %}
+                </div>
+                <h1><span class="name">Stats</span></h1>
+                <button type="button" onclick="toggleCollapse('grid-container', this, ' Stats', null)" class='stats-button'>Hide</button>
+                <div class="grid-container">
+                    <div class='hr'>
+                        <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
+                        <h2><span class="container-title">Heart Rate:</span></h2>
+                        <h2><span class="name">Avg HR:</span> <span class="value">{{activity['Avg HR']}} bpm</span></h2>
+                        <h2><span class="name">Max HR:</span> <span class="value">{{activity['Max HR']}} bpm</span></h2>
+                        <h2><span class="name">Recovery HR:</span> <span class="value">{{activity['Recovery HR']}} bpm</span></h2>
+                    </div>
+                    {% if activity['Sport'] == 'Running' %}
+                        <div class='steps'>
+                            <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
+                            <h2><span class="container-title">Steps:</span></h2>
+                            <h2><span class="name">Avg Cadence:</span> <span class="value">{{activity['Avg Cadence']}} spm</span></h2>
+                            <h2><span class="name">Max Cadence:</span> <span class="value">{{activity['Max Cadence']}} spm</span></h2>
+                            <h2><span class="name">Number of Steps:</span> <span class="value">{{activity['Steps']}}</span></h2>
+                            <h2><span class="name">Avg Stride Length:</span> <span class="value">{{activity['Avg Stride Length']}} m</span></h2>
+                        </div>
+                    {% elif activity['Sport'] == 'Rowing' %}
+                        <div class='strokes'>
+                            <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
+                            <h2><span class="container-title">Strokes:</span></h2>
+                            <h2><span class="name">Stroke Rate:</span> <span class="value">{{activity['Stroke Rate']}} spm</span></h2>
+                            <h2><span class="name">Elapsed Stroke Rate:</span> <span class="value">{{activity['Elapsed Stroke Rate']}} spm</span></h2>
+                            <h2><span class="name">Number of Strokes:</span> <span class="value">{{activity['Total Strokes']}}</span></h2>
+                        </div>
+                    {% endif %}
+                    <div class='calories'>
+                        <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
+                        <h2><span class="container-title">Nutrition:</span></h2>
+                        <h2><span class="name">Resting Calories:</span> <span class="value">{{activity['Resting Calories']}} cal</span></h2>
+                        <h2><span class="name">Active Calories:</span> <span class="value">{{activity['Active Calories']}} cal</span></h2>
+                        <h2><span class="name">Total Calories:</span> <span class="value">{{activity['Total Calories']}} cal</span></h2>
+                        <h2><span class="name">Sweat Loss:</span> <span class="value">{{activity['Sweat Loss']}} ml</span></h2>
+                    </div>
+                    <div class='elevation'>
+                        <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
+                        <h2><span class="container-title">Elevation:</span></h2>
+                        <h2><span class="name">Total Ascent:</span> <span class="value">{{activity['Total Ascent']}} ft</span></h2>
+                        <h2><span class="name">Total Descent:</span> <span class="value">{{activity['Total Descent']}} ft</span></h2>
+                    </div>
+                </div>
+            </div>
+        
+        <form action="/editTitle" method="post" id='editTitleModal'>
+            <input type="hidden" name="activity_id" value="{{activity['activity_id']}}">
+            <input type="hidden" name="source" value="{{ source}}">
+            <input type="hidden" name="old_date" value="{{activity['date_edit']}}">
+            <div class="modalContainer">
+                <button type="button" class="close" onclick="window.location.href='/activity'">X</button>
+                <div class='modalEditSection'>
+                    <h3><span class='name'>Edit Date: </span></h3>
+                    <input type="date" id = 'date_edit' name="date" value="{{activity['date_edit']}}" onclick="if(this.defaultValue==this.value)this.value=''">
+                    <h3 style='padding-left:15px'><span class='name'>Edit Start Time: </span></h3>
+                    <input type="time" name="time" id = 'time_edit' value="{{activity['time_edit']}}" onclick="if(this.defaultValue==this.value)this.value=''">
+                </div>
+                <div class = 'modalEditSection'>
+                    <h3><span class='name'>Edit Title: </span></h3>
+                    <input type="text" id = 'title_edit' name="title" placeholder="{{activity['Activity Title']}}" style='width:350px'>
+                </div>
+                <h3><span class='name'>Edit Description: </span></h3>
+                <div class='modalContainerBottom'>
+                    <div class = 'bottomModalContainer'>
+                        <textarea id ='desc_edit' name="description" >{{activity['Description']}}</textarea>
+                        <input class = 'submitButton' type="submit" value="Submit">
+                    </div>
+                </div>
+            </div>
+        </form>
+        {% endfor %}
+        <script>
+            var modal = document.getElementById('editTitleModal');
+            var backdrop = document.getElementById('modalBackdrop');
+
+            // Get the button that opens the modal
+            var btn = document.getElementById('openModalButton');
+
+            // Get the <span> element that closes the modal
+            var span = document.getElementsByClassName('close')[0];
+
+            var date_edit = document.getElementById('date_edit');
+            var time_edit = document.getElementById('time_edit');
+            var title_edit = document.getElementById('title_edit');
+            var desc_edit = document.getElementById('desc_edit');
+            var sport_edit = document.getElementById('sport_edit');
+
+            // When the user clicks the button, open the modal 
+            btn.onclick = function() {
+                modal.style.display = "block";
+                backdrop.style.display = "block";
+                if (date_edit.value === '') {
+                    date_edit.value = date_edit.defaultValue;
+                }
+                if (time_edit.value === '') {
+                    time_edit.value = time_edit.defaultValue;
+                }
+            }
+
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function() {
+                modal.style.display = "none";
+                backdrop.style.display = "none";
+                date_edit.value = date_edit.defaultValue;
+                time_edit.value = time_edit.defaultValue;
+                title_edit.value = title_edit.defaultValue;
+                desc_edit.value = desc_edit.defaultValue;
+                sport_edit.value = sport_edit.defaultValue;
+
+            }
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function(event) {
+                if (event.target == modal || event.target == backdrop) {
+                    modal.style.display = "none";
+                    backdrop.style.display = "none";
+                }
+            }
+        </script>
+    </body>
+</html>

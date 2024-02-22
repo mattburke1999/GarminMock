@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Log In</title>
+        <link rel="stylesheet" type="text/css" href="../static/css/multipleActivity.css">
+    </head>
+    <body class = loginPage>
+        <h1>Log In</h1>
+        <div class="loginContainer">
+            <form method="post" action="/login">
+                {% if show_error %}
+                    <h5 style="color:red"> The username or password is incorrect. </h5>
+                {% endif %}
+                <div>
+                    <input type="text" class = 'loginInput' placeholder="Username" name="username" required>
+                </div>
+                <div>
+                    <input type="password" class = 'loginInput' placeholder="Password" name="password" required>
+                </div>
+                <div class="button-container">
+                    <button class = 'submitButton' type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
+        <div class="account-container">
+            <h5>Don't have an account?</h5>
+            <a href="{{ url_for('register') }}" class="create-account-link">Create Account</a>
+        </div>
+    </body>
+</html>

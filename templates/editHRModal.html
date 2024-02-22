@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Heart Rate</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/multipleActivity.css">
+</head>
+    <body>
+        <form action="/editHeartRate" method="post">
+            <div class="modalContainer">
+                <button type="button" class="close" onclick="window.location.href='/activity'">X</button>
+                <div class='modalEditSection'>
+                    <h3><span class='name'>Edit Avg HR: </span></h3>
+                    <input type="text" name="avgHR" placeholder="New Avg HR">
+                </div>
+                <div class = 'modalEditSection'>
+                    <h3><span class='name'>Edit Max HR: </span></h3>
+                    <input type="text" name="maxHR" placeholder="New Max HR" >
+                </div>
+                <div class = 'modalEditSection'>
+                    <h3><span class='name'>Edit Recovery HR: </span></h3>
+                    <input type="text" name="recoveryHR" placeholder="New Recovery HR" >
+                </div>
+                <input class = 'submitButton' type="submit" value="Submit">
+            </div>
+        </form>
+    </body>
+</html>

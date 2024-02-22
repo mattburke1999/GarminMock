@@ -11,8 +11,6 @@ from dotenv import load_dotenv
 import os
 import json
 load_dotenv()
-import time
-from time import sleep
 
 app = Flask(__name__)
 mile_dist = 1609.344
@@ -422,13 +420,13 @@ def searchByMonth():
         button_pressed = request.form['search']
         month = request.form['month']
         year = request.form['year']
-        
-        if button_pressed == 'summary':
-            return pre_MonthSummary(month, year)
-        elif button_pressed == 'detail':
-            return preMonthDetail(month, year)
-        else: # button_pressed == 'recap'
-            return pre_monthgroupweek(month, year)
+        return preMonthDetail(month, year)
+        # if button_pressed == 'summary':
+        #     return pre_MonthSummary(month, year)
+        # elif button_pressed == 'detail':
+        #     return preMonthDetail(month, year)
+        # else: # button_pressed == 'recap'
+            # return pre_monthgroupweek(month, year)
     
     return render_template('searchByMonth.html')
 
@@ -438,11 +436,9 @@ def searchByDate():
     if request.method == 'POST':
         # Access the form data:
         date_str = request.form['date']
-        # return render_template('searchByDate.html')
         timestamp = pd.to_datetime(date_str)
         return preSingleDate(timestamp)
     
-    # Render the homePage.html for GET request
     return render_template('searchByDate.html')
 
 @app.route('/')

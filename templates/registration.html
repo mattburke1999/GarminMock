@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Create Account</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                padding: 20px;
+            }
+
+            .box {
+                background-color: white;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+                max-width: 500px;
+                margin: auto;
+            }
+
+            h1 {
+                text-align: center;
+                color: #333;
+            }
+
+            h5 {
+                margin-bottom: 5px;
+            }
+
+            input {
+                width: 100%;
+                padding: 10px;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+
+            .create-account-button {
+                width: 100%;
+                background-color: #4CAF50;
+                color: white;
+                padding: 15px 20px;
+                margin: 10px 0;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 18px;
+            }
+
+            .create-account-button:hover {
+                background-color: #45a049;
+            }
+            .checkmark {
+                font-size: 20px;
+            }
+    
+            .checkmark.green {
+                color: green;
+            }
+    
+            .checkmark.red {
+                color: red;
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <h1>Create Account</h1>
+            <div class="box">
+                <form action="/registrationPage" method="post">
+                    <div>
+                        <h5>First Name</h5>
+                        <input type="text" id="first-name" name = 'first-name' placeholder="First Name">
+                    </div>
+                    <div>
+                        <h5>Last Name</h5>
+                        <input type="text" id="last-name" name = 'last-name' placeholder="Last Name">
+                    </div>
+                    <div>
+                        <h5>Email</h5>
+                        <input type="text" id="email" name = 'email' placeholder="Email">
+                    </div>
+                    <div>
+                        <h5>Username</h5>
+                        <input type="text" id="username" name = 'username' placeholder="Username">
+                    </div>
+                    <div>
+                        <h5>Password</h5>
+                        <input type="password" id="password" name = 'password' placeholder="Password">
+                    </div>
+                    <div>
+                        <h5>Confirm Password</h5>
+                        <input type="password" id="confirm-password" placeholder="Confirm Password">
+                        <span id="password-checkmark" class="checkmark"></span>
+                        <span id="password-message"></span>
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="create-account-button">Create Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    
+        <script>
+            document.getElementById('confirm-password').addEventListener('keyup', function() {
+                var password = document.getElementById('password').value;
+                var confirmPassword = document.getElementById('confirm-password').value;
+                var checkmark = document.getElementById('password-checkmark');
+                var message = document.getElementById('password-message');
+    
+                if (password === confirmPassword) {
+                    checkmark.innerHTML = '&#10004;'; // Unicode for green checkmark
+                    checkmark.className = 'checkmark green';
+                    message.textContent = 'Passwords match.';
+                    message.style.color = 'black';
+                } else {
+                    checkmark.innerHTML = '&#10008;'; // Unicode for red checkmark
+                    checkmark.className = 'checkmark red';
+                    message.textContent = 'Passwords do not match.';
+                    message.style.color = 'red';
+                }
+            });
+        </script>
+    </body>
+</html>
+    

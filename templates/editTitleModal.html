@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Title</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/multipleActivity.css">
+</head>
+<body>
+    <form action="/editTitle" method="post">
+        <div class="modalContainer">
+            <button type="button" class="close" onclick="window.location.href='/activity'">X</button>
+            <div class='modalEditSection'>
+                <h3><span class='name'>Edit Date: </span></h3>
+                <input type="date" name="date" placeholder="Date">
+                <h3 style='padding-left:15px'><span class='name'>Edit Start Time: </span></h3>
+                <input type="time" name="time" placeholder="Time">
+            </div>
+            <div class = 'modalEditSection'>
+                <h3><span class='name'>Edit Title: </span></h3>
+                <input type="text" name="title" placeholder="Title" style='width:350px'>
+            </div>
+            <div class = 'modalEditSection'>
+                <h3><span class='name'>Edit Sport: </span></h3>
+                <select id = 'sport_edit' name="sport" value="{{activity['Sport']}}" onclick="if(this.defaultValue==this.value)this.value=''">
+                    <option value="Running">Running</option>
+                    <option value="Cycling">Cycling</option>
+                    <option value="Rowing">Rowing</option>
+                </select>
+            </div>
+            <h3><span class='name'>Edit Description: </span></h3>
+            <textarea name="description" placeholder="Description"></textarea>
+            <input class = 'submitButton' type="submit" value="Submit">
+            <input type="hidden" name="activity_id" value={{activity['activity_id']}}>
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Search By Date</title>
+        <style>
+            body {
+                font-family: comic sans ms, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 0;
+                line-height: 1.6;
+            }
+            .container {
+                width: 40%;
+                margin: auto;
+                overflow: hidden;
+                padding: 20px;
+                background-color: #fff;
+                border-radius: 5px;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }
+            h2 {
+                color: #333;
+                text-align: center;
+                padding-bottom: 20px;
+                border-bottom: 1px solid #ddd;
+            }
+            .search-form {
+                width: 82%; 
+                margin: 2em auto; 
+                padding: 3em;
+                border-radius: 0.5em;
+                font-family: 'Courier New', monospace;
+            }
+            .search-form input, .search-form button {
+                padding: 1em;
+                margin-bottom: 1em;
+                border-radius: 0.5em;
+                border: 1px solid #ddd;
+                font-family: 'Courier New', monospace;
+            }
+            .search-form input {
+                width: 93%;
+            }
+            .search-form button {
+                width: 100%;
+                color: #fff;                
+                background-color: #007BFF;
+                cursor: pointer;
+            }
+            .search-form button:hover {
+                background-color: #0056b3;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Search for Activity By Date</h2>
+            <div class="search-form">
+                <form method="post" action="/searchByDate">
+                    <input type="date" name="date" placeholder="Date" required><br><br>
+                    <button type="submit" name="search">Search</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
