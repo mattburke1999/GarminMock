@@ -2,8 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, session
 import pandas as pd
 import warnings
 from functools import wraps
-import psycopg2
-import bcrypt
 import smtplib
 warnings.filterwarnings("ignore")
 from dotenv import load_dotenv
