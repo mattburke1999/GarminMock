@@ -1,36 +1,75 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Title</title>
-    <link rel="stylesheet" type="text/css" href="../static/css/multipleActivity.css">
-</head>
-<body>
-    <form action="/editTitle" method="post">
-        <div class="modalContainer">
-            <button type="button" class="close" onclick="window.location.href='/activity'">X</button>
-            <div class='modalEditSection'>
-                <h3><span class='name'>Edit Date: </span></h3>
-                <input type="date" name="date" placeholder="Date">
-                <h3 style='padding-left:15px'><span class='name'>Edit Start Time: </span></h3>
-                <input type="time" name="time" placeholder="Time">
-            </div>
-            <div class = 'modalEditSection'>
-                <h3><span class='name'>Edit Title: </span></h3>
-                <input type="text" name="title" placeholder="Title" style='width:350px'>
-            </div>
-            <div class = 'modalEditSection'>
-                <h3><span class='name'>Edit Sport: </span></h3>
-                <select id = 'sport_edit' name="sport" value="{{activity['Sport']}}" onclick="if(this.defaultValue==this.value)this.value=''">
-                    <option value="Running">Running</option>
-                    <option value="Cycling">Cycling</option>
-                    <option value="Rowing">Rowing</option>
-                </select>
-            </div>
-            <h3><span class='name'>Edit Description: </span></h3>
-            <textarea name="description" placeholder="Description"></textarea>
-            <input class = 'submitButton' type="submit" value="Submit">
-            <input type="hidden" name="activity_id" value={{activity['activity_id']}}>
+<form action="/editTitle" method="post" id='editTitleModal'>
+    <input type="hidden" name="activity_id" value="{{activity['activity_id']}}">
+    <input type="hidden" name="source" value="{{ source}}">
+    <input type="hidden" name="old_date" value="{{activity['date_edit']}}">
+    <div class="modalContainer">
+        <button type="button" class="close" onclick="window.location.href='/activity'">X</button>
+        <div class='modalEditSection'>
+            <h3><span class='name'>Edit Date: </span></h3>
+            <input type="date" id = 'date_edit' name="date" value="{{activity['date_edit']}}" onclick="if(this.defaultValue==this.value)this.value=''">
+            <h3 style='padding-left:15px'><span class='name'>Edit Start Time: </span></h3>
+            <input type="time" name="time" id = 'time_edit' value="{{activity['time_edit']}}" onclick="if(this.defaultValue==this.value)this.value=''">
         </div>
-    </form>
-</body>
-</html>
+        <div class = 'modalEditSection'>
+            <h3><span class='name'>Edit Title: </span></h3>
+            <input type="text" id = 'title_edit' name="title" placeholder="{{activity['Activity Title']}}" style='width:350px'>
+        </div>
+        <h3><span class='name'>Edit Description: </span></h3>
+        <div class='modalContainerBottom'>
+            <div class = 'bottomModalContainer'>
+                <textarea id ='desc_edit' name="description" >{{activity['Description']}}</textarea>
+                <input class = 'submitButton' type="submit" value="Submit">
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    var modal = document.getElementById('editTitleModal');
+    var backdrop = document.getElementById('modalBackdrop');
+
+    // Get the button that opens the modal
+    var btn = document.getElementById('openModalButton');
+
+    // Get the <span> element that closes the modal
+    var span = document.getElementsByClassName('close')[0];
+
+    var date_edit = document.getElementById('date_edit');
+    var time_edit = document.getElementById('time_edit');
+    var title_edit = document.getElementById('title_edit');
+    var desc_edit = document.getElementById('desc_edit');
+    var sport_edit = document.getElementById('sport_edit');
+
+    // When the user clicks the button, open the modal 
+    btn.onclick = function() {
+        modal.style.display = "block";
+        backdrop.style.display = "block";
+        document.body.style.overflow = 'hidden';
+        if (date_edit.value === '') {
+            date_edit.value = date_edit.defaultValue;
+        }
+        if (time_edit.value === '') {
+            time_edit.value = time_edit.defaultValue;
+        }
+    }
+
+    // When the user clicks on <span> (x), close the modal
+    span.onclick = function() {
+        modal.style.display = "none";
+        backdrop.style.display = "none";
+        document.body.style.overflow = 'auto';
+        date_edit.value = date_edit.defaultValue;
+        time_edit.value = time_edit.defaultValue;
+        title_edit.value = title_edit.defaultValue;
+        desc_edit.value = desc_edit.defaultValue;
+        sport_edit.value = sport_edit.defaultValue;
+
+    }
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+        if (event.target == modal || event.target == backdrop) {
+            modal.style.display = "none";
+            backdrop.style.display = "none";
+            document.body.style.overflow = 'auto';
+        }
+    }
+</script>
