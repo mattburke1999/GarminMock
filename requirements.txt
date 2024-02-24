@@ -5,3 +5,5 @@ psycopg2-binary  # or just psycopg2 if you prefer
 bcrypt
 python-dotenv
 pyarrow
+selenium
+webdriver-manager
