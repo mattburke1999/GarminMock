@@ -7,7 +7,7 @@ import pandas as pd
 class DataAccess:
 
     def connect_to_postgres(self):
-        db_params = json.loads(os.environ.get('PostgreSQL'))
+        db_params = json.loads(os.environ.get('PostgreSQL_desktop'))
         cnxn = psycopg2.connect(**db_params)
         cnxn.autocommit = True
         return cnxn
