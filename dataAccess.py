@@ -86,6 +86,18 @@ class DataAccess:
         self.delete_cookie(id)
         return value   
     
+    def convert_timestamps(self, df, columns, from_tz='UTC', to_tz='America/Chicago'):
+        for column in columns:
+            if column in df.columns and pd.api.types.is_datetime64_any_dtype(df[column]):
+                # Check if the datetime data is naive or timezone-aware
+                if df[column].dt.tz is None:
+                    # If naive, localize to the original timezone then convert
+                    df[column] = pd.to_datetime(df[column]).dt.tz_localize(from_tz, ambiguous='infer').dt.tz_convert(to_tz)
+                else:
+                    # If already timezone-aware, directly convert to the new timezone
+                    df[column] = df[column].dt.tz_convert(to_tz)
+        return df
+
     def get_activity_info_by_date(self, date):
         cnxn = self.connect_to_postgres()
         cnxn.autocommit = False
@@ -94,9 +106,8 @@ class DataAccess:
 
         session_curs, lap_curs = cursor.fetchone()
 
-        session_info = pd.read_sql_query(f'FETCH ALL IN "{session_curs}"', cnxn)
-        session_info = session_info
-        lap_info = pd.read_sql_query(f'FETCH ALL IN "{lap_curs}"', cnxn)
+        session_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{session_curs}"', cnxn), ['start_time', 'timestamp'])
+        lap_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{lap_curs}"', cnxn), ['start_time', 'timestamp'])
 
         cnxn.close()
         return session_info, lap_info
@@ -109,9 +120,9 @@ class DataAccess:
 
         session_curs, lap_curs = cursor.fetchone()
 
-        session_info = pd.read_sql_query(f'FETCH ALL IN "{session_curs}"', cnxn)
-        session_info = session_info
-        lap_info = pd.read_sql_query(f'FETCH ALL IN "{lap_curs}"', cnxn)
+        session_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{session_curs}"', cnxn), ['start_time', 'timestamp'])
+        lap_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{lap_curs}"', cnxn), ['start_time', 'timestamp'])
+
         cnxn.close()
         return session_info, lap_info
     
