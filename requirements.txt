@@ -7,3 +7,5 @@ python-dotenv
 pyarrow
 selenium
 webdriver-manager
+sqlalchemy
+fitparse
