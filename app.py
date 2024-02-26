@@ -57,7 +57,7 @@ def preMonthDetail(month, year):
         print("NO ACTIVITY FOUND")
         return render_template('searchByMonth.html')
     activity_list = dt.prepare_multiple_activities(session_df)
-    lap_html_list = dt.prepare_lap_info(lap_df)
+    lap_html_list = dt.prepare_lap_info(lap_df, session_df)
     ## activity list and lap html list are too large to store in session, so we store them in the database and store the id in the session
     activity_list_id = da.create_cookie(json.dumps(activity_list))
     session['activity_list'] = activity_list_id
@@ -75,7 +75,7 @@ def preSingleDate(timestamp):
         print("NO ACTIVITY FOUND")
         return render_template('searchByDate.html')
     activity_list = dt.prepare_multiple_activities(session_df)
-    lap_html_list = dt.prepare_lap_info(lap_df )
+    lap_html_list = dt.prepare_lap_info(lap_df, session_df)
     date_string = timestamp.strftime('%B %d %Y')
     ## activity list and lap html list are too large to store in session, so we store them in the database and store the id in the session
     lap_html_list_id = da.create_cookie(json.dumps(lap_html_list))

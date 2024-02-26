@@ -58,8 +58,8 @@ class DataTransform:
         activity_dict['Elapsed Stroke Rate'] = float(round((total_cycles / (elapsed_time / 60)),2))
         return activity_dict
 
-    def lap_dfs_to_htmls(self, lap_df):
-        activity_ids = lap_df['activity_id'].unique()
+    def lap_dfs_to_htmls(self, lap_df, session_df):
+        activity_ids = session_df['activity_id'].tolist()
         lap_html_list = []
         for activity_id in activity_ids:
             lap = lap_df[lap_df['activity_id'] == activity_id]
@@ -71,7 +71,10 @@ class DataTransform:
                 for col in lap.columns:
                     lap_html = lap_html.replace(f'<th>{col}</th>', f'<th class="colTitle">{col}</th>')
                 lap_html_list.append(lap_html)
-        return lap_html_list
+        if len(lap_html_list) == 0:
+            return [None]
+        else:
+            return lap_html_list
 
     def time_seconds_to_string_lap(self, seconds):
         hours = int(seconds / 3600)
@@ -86,7 +89,7 @@ class DataTransform:
                 return f'{hours}:{minutes}:0{round(seconds,3)}'
             return f'{hours}:{minutes}:{round(seconds,3)}'
 
-    def prepare_lap_info(self, df):
+    def prepare_lap_info(self, df, session_df):
         cols = df.columns.tolist()
         df['lap'] = df['lap_num']
         df['distance'] = df['total_distance'].apply(lambda x: round(x/mile_dist, 2))
@@ -111,7 +114,7 @@ class DataTransform:
         cols.remove('activity_id')
         df = df.sort_values(by=['start_time', 'lap'])
         df = df.drop(cols, axis=1)
-        html_list = self.lap_dfs_to_htmls(df)
+        html_list = self.lap_dfs_to_htmls(df, session_df)
         return html_list
 
     def prepare_multiple_activities(self, df):
