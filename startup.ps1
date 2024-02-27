@@ -1,4 +1,4 @@
-# Check if 'env\flask_env' directory exists
+# RUN THIS IN POWERSHELL
 if (-not (Test-Path -Path env\flask_env)) {
     # create env folder
     mkdir env

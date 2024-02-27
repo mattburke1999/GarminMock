@@ -1,3 +1,5 @@
+:: RUN THIS FROM COMMAND PROMPT
+@echo off
 IF NOT EXIST env\flask_env (
     :: create env folder
     mkdir env
