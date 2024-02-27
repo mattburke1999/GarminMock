@@ -64,8 +64,8 @@
                         <h2><span class="name">Duration:</span> <span class="value">{{activity['Duration']}}</span></h2>
                         <h2><span class="name">Elapsed Time:</span> <span class="value">{{activity['Elapsed Time']}}</span></h2>
                         {% if activity['Sport'] == 'Running'%}                
-                            <h2><span class="name">Avg Pace:</span> <span class="value">{{activity['Pace']}} min/mi</span></h2>
-                            <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} min/mi</span></h2>
+                            <h2><span class="name">Avg Pace:</span> <span class="value">{{activity['Pace']}} /mi</span></h2>
+                            <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} /mi</span></h2>
                         {% elif activity['Sport'] == 'Cycling'%}
                             <h2><span class="name">Avg Speed:</span> <span class="value">{{activity['Speed']}} mph</span></h2>
                             <h2><span class="name">Elapsed Speed:</span> <span class="value">{{activity['Elapsed Speed']}} mph</span></h2>
