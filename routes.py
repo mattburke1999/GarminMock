@@ -1,10 +1,11 @@
-from flask import Blueprint
+from flask import Blueprint, request
 from views import show_register, register, login, check_login, home, homePage, show_login_form,\
     show_searchByDate_form, searchByDate, multiple_activity, show_searchByMonth_form, searchByMonth,\
     editTitle, show_searchByYear_form
 
 
 bp = Blueprint('main', __name__)
+
 
 def login_required(f):
     return check_login(f)
@@ -26,8 +27,9 @@ def show_login_form_route():
     return show_login_form()
 
 @bp.route('/')
+@login_required
 def home_route():
-    return home()
+    return homePage()
 
 @bp.route('/homePage', methods=['GET'])
 @login_required
@@ -39,10 +41,10 @@ def homePage_route():
 def show_searchByDate_form_route():
     return show_searchByDate_form()
 
-@bp.route('/searchByDate', methods=['POST'])
+@bp.route('/searchByDate/<date>', methods=['GET'])
 @login_required
-def searchByDate_route():
-    return searchByDate()
+def searchByDate_route(date):
+    return searchByDate(date)
 
 @bp.route('/multiple_activity')
 @login_required
@@ -54,17 +56,20 @@ def multiple_activity_route():
 def show_searchByMonth_form_route():
     return show_searchByMonth_form()
 
-@bp.route('/searchByMonth', methods=['POST'])
+@bp.route('/searchByMonth', methods=['GET'])
 @login_required
 def searchByMonth_route():
-    return searchByMonth()
+    month = request.args.get('month')
+    year = request.args.get('year')
+    search = request.args.get('search')
+    return searchByMonth(month, year, search)
 
 @bp.route('/searchByYear_form', methods=['GET'])
 @login_required
 def show_searchByYear_form_route():
     return show_searchByYear_form()
 
-@bp.route('editTitle', methods=['POST'])
+@bp.route('/editTitle', methods=['POST'])
 @login_required
 def editTitle_route():
     return editTitle()

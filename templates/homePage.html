@@ -45,9 +45,9 @@
     <body>
         <div class="card">
             <h1>Home</h1>
-            <a href="{{ url_for('searchByDate') }}" class="search_by_date">Search By Date</a>
-            <a href="{{ url_for('searchByMonth') }}" class="search_by_month">Search By Month</a>
-            <a href="{{ url_for('searchByYear') }}" class="search_by_year">Search By Year</a>
+            <a href="{{ url_for('main.show_searchByDate_form_route') }}" class="search_by_date">Search By Date</a>
+            <a href="{{ url_for('main.show_searchByMonth_form_route') }}" class="search_by_month">Search By Month</a>
+            <a href="{{ url_for('main.show_searchByDate_form_route') }}" class="search_by_year">Search By Year</a>
         </div>
     </body>
 </html>

@@ -6,8 +6,11 @@ import smtplib
 from functools import wraps
 import pandas as pd
 import json
+import redis
 
-da = DataAccess()
+redis_cnxn = redis.Redis(host='localhost', port=6379, db=0, password = os.environ.get('redis_password'))
+
+da = DataAccess(redis_cnxn)
 dt = DataTransform()
 
 def show_register():
@@ -49,7 +52,7 @@ def check_login(f):
     def decorated_function(*args, **kwargs):
         if 'logged_in' not in session or session['logged_in'] == False:
             print("NOT LOGGED IN")
-            return redirect(url_for('login', next=request.url))
+            return redirect(url_for('main.show_login_form_route', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -103,8 +106,8 @@ def preSingleDate(timestamp):
     print("ACTIVITY FOUND")
     return redirect(url_for('main.multiple_activity_route'))
 
-def searchByDate():
-    date_str = request.form['date']
+def searchByDate(date_str):
+    # date_str = request.form['date']
     timestamp = pd.to_datetime(date_str)
     return preSingleDate(timestamp)
 
@@ -131,10 +134,10 @@ def preMonthDetail(month, year):
     print("ACTIVITY FOUND")
     return redirect(url_for('main.multiple_activity_route'))
 
-def searchByMonth():
-    button_pressed = request.form['search']
-    month = request.form['month']
-    year = request.form['year']
+def searchByMonth(month, year, button_pressed):
+    # button_pressed = request.form['search']
+    # month = request.form['month']
+    # year = request.form['year']
     return preMonthDetail(month, year)
     # if button_pressed == 'summary':
     #     return pre_MonthSummary(month, year)
@@ -145,9 +148,13 @@ def searchByMonth():
 
 def multiple_activity():
     lap_html_list_id = session['lap_html_list']
-    lap_html_list = da.get_cookie_value(lap_html_list_id)
+    lap_html_list = json.loads(da.get_cookie_value(lap_html_list_id))
+    print('LAP TYPE')
+    print(type(lap_html_list))
+    print('\nACTIVITY TYPE')
     activity_list_id = session['activity_list']
-    activity_list = da.get_cookie_value(activity_list_id)
+    activity_list = json.loads(da.get_cookie_value(activity_list_id))
+    print(type(activity_list))
     return render_template('multipleActivity.html', activity_list=activity_list, date_title = session['date_title'], lap_html_list=lap_html_list, source=session['source'], zip=zip)
 
 def show_searchByYear_form():
