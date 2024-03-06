@@ -66,23 +66,6 @@ class DataAccess:
         self.redis_cnxn.setex(cookie_key, expire, value)
         # Return the unique key
         return cookie_key
-        # cnxn = self.connect_to_postgres()
-        # query = 'insert into public.cookies(value) VALUES (%s) returning id'
-        # cursor = cnxn.cursor()
-        # cursor.execute(query, (value,))
-        # cnxn.commit()
-        # id = cursor.fetchone()[0]
-        # cnxn.close()
-        # return id
-
-    # def delete_cookie(self, id):
-    #     cnxn = self.connect_to_postgres()
-    #     query = 'delete from public.cookies where id = %s'
-    #     cursor = cnxn.cursor()
-    #     cursor.execute(query, (id,))
-    #     cnxn.commit()
-    #     cnxn.close()
-    #     return
 
     def get_cookie_value(self, id):
         # Atomically get and delete the value from Redis
@@ -95,16 +78,6 @@ class DataAccess:
         print('no value from redis')
         return None
         
-        # cnxn = self.connect_to_postgres()
-        # query = 'select value from public.cookies where id = %s'
-        # cursor = cnxn.cursor()
-        # cursor.execute(query, (id,))
-        # value = cursor.fetchone()[0]
-        # cnxn.close()
-        
-        # self.delete_cookie(id)
-        # return value   
-    
     def convert_timestamps(self, df, columns, from_tz='UTC', to_tz='America/Chicago'):
         for column in columns:
             if column in df.columns and pd.api.types.is_datetime64_any_dtype(df[column]):

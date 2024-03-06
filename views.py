@@ -149,12 +149,8 @@ def searchByMonth(month, year, button_pressed):
 def multiple_activity():
     lap_html_list_id = session['lap_html_list']
     lap_html_list = json.loads(da.get_cookie_value(lap_html_list_id))
-    print('LAP TYPE')
-    print(type(lap_html_list))
-    print('\nACTIVITY TYPE')
     activity_list_id = session['activity_list']
     activity_list = json.loads(da.get_cookie_value(activity_list_id))
-    print(type(activity_list))
     return render_template('multipleActivity.html', activity_list=activity_list, date_title = session['date_title'], lap_html_list=lap_html_list, source=session['source'], zip=zip)
 
 def show_searchByYear_form():
