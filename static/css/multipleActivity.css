@@ -2,7 +2,7 @@ body {
     font-family: 'Courier New', monospace;
     margin: 0;
     padding: 0;
-    background-color: #f0f0f0;
+    background: linear-gradient(to right, #f0f0f0, #ffffff);
     color: #333;
 }
 .container {
@@ -14,9 +14,34 @@ body {
     border-radius: 10px;
     transition: all 0.3s ease;
 }
+.card {
+    width: 50%;
+    margin: 20px auto;
+    padding: 20px;
+    padding-bottom: 100px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.notFound {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* display vertically centered */
+    height: 100vh;
+}
 .modalContainerBottom {
     height: 170px;
     resize: none;
+}
+.search-container {
+    width: 40%;
+    margin: auto;
+    overflow: hidden;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 .bottomModalContainer {
     position: relative;
@@ -65,6 +90,43 @@ body {
 }
 h1, .stats-button, .splits-button {
     margin-right: 10px;
+}
+.search-h2 {
+    color: #333;
+    font-size: 24px;
+    text-align: center;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+.search-form {
+    width: 82%; 
+    margin: 2em auto; 
+    padding: 3em;
+    border-radius: 0.5em;
+    font-family: 'Courier New', monospace;
+}
+.search-form input, .search-form button {
+    padding: 1em;
+    margin-bottom: 1em;
+    border-radius: 0.5em;
+    border: 1px solid #ddd;
+    font-family: 'Courier New', monospace;
+}
+.search-form input {
+    width: 93%;
+    font-size: 16px;
+}
+.search-form input.has-input {
+    font-weight: bold;
+}
+.search-form button {
+    width: 100%;
+    color: #fff;                
+    background-color: #007BFF;
+    cursor: pointer;
+}
+.search-form button:hover {
+    background-color: #0056b3;
 }
 .close{
     display: flex;
@@ -124,6 +186,31 @@ button:hover {
     transition: all 0.3s ease;
     position: relative;
 }
+.home_link {
+    display: inline-block;
+    margin: 10px;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: white;
+    background-color: #007BFF;
+    border-radius: 5px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+}
+.home_link:hover {
+    background-color: #0056b3;
+    box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.2);
+}
+.home_h1 {
+    font-size: 2.5em;
+    font-weight: bold;
+}
+.home_body {
+    font-family: 'Roboto', sans-serif;
+    text-align: center;
+    padding: 50px 20px;
+    margin: 20px;
+}
 .modal-backdrop {
     display: none;
     position: fixed;
@@ -139,6 +226,28 @@ h3 {
     margin-block-end: 0;
     padding-left: 0;
     padding-right: 2px;
+}
+.menuBar {
+    display: flex;
+    justify-content: space-around;
+    background-color: #333;
+    padding: 10px;
+    color: white;
+}
+.menuBar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+}
+.menuBar a:hover {
+    background-color: #ddd;
+    color: black;
+    border-radius: 5px;
+}
+.WebName {
+    margin-right: 0;
+    margin-top: 0;
+    color:#0056b3;
 }
 #editTitleModal {
     position: fixed;

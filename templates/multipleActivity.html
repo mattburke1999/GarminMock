@@ -1,47 +1,35 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Activities</title>
-        <link rel="stylesheet" type="text/css" href="../static/css/multipleActivity.css">
-        <script>
-            function toggleCollapse(className, button, buttonText, icon) {
-                var container = button.parentElement;
-                var elements = container.querySelectorAll('.' + className);
-                var icons = icon ? container.querySelector('#' + icon) : null;
-                for (var i = 0; i < elements.length; i++) {
-                    if (elements[i].style.display === "none") {
-                        if (buttonText === ' Stats') {
-                            console.log(buttonText)
-                            elements[i].style.display = "grid";
-                        } else {
-                            elements[i].style.display = "block";
-                            if (icons !== null) {
-                                icons.style.display = "block";
+{% extends 'base.html' %}
+        {% block title %}Activities{% endblock %}
+        {% block head %}
+            <script>
+                function toggleCollapse(className, button, buttonText) {
+                    var container = button.parentElement;
+                    var elements = container.querySelectorAll('.' + className);
+                    for (var i = 0; i < elements.length; i++) {
+                        if (elements[i].style.display === "none") {
+                            if (buttonText === ' Stats') {
+                                console.log(buttonText)
+                                elements[i].style.display = "grid";
+                            } else {
+                                elements[i].style.display = "block";
                             }
-                        }
-                        button.innerHTML = "Hide";
-                        button.style.marginBottom = "10px"
-                    } else {
-                        elements[i].style.display = "none";
-                        button.innerHTML = "View " + buttonText;
-                        button.style.marginBottom = "0px"
-                        if (icon !== null) {
-                            icons.style.display = "none";
+                            button.innerHTML = "Hide";
+                            button.style.marginBottom = "10px"
+                        } else {
+                            elements[i].style.display = "none";
+                            button.innerHTML = "View " + buttonText;
+                            button.style.marginBottom = "0px"
                         }
                     }
                 }
-            }
-        </script>
-    </head>
-    <body>
+            </script>
+        {% endblock %}
+    {% block body %}
         <div id = 'modalBackdrop' class = 'modal-backdrop'></div>
         <h1 class ='pageTitle'>Activities for {{date_title}}</h1>
         {% for activity, lap_html in zip(activity_list, lap_html_list) %}
             <div class="container">
                 <div class='header'>
-                    <button  id="openModalButton" class = 'openModalButton'>
-                        <img class="header-image" src="../static/images/edit-icon.jpg" alt="Edit icon">
-                    </button>
                     <div class='topHeader'>
                         {% if activity['Sport'] == 'Running' %}
                             <img src="../static/images/running-icon.jpg" alt="Running icon">
@@ -59,7 +47,6 @@
                     <h3><span class = 'name'>Description:</span> <span class = 'value'>{{activity['Description']}}</span></h3>
                 </div>
                 <div class='times'>
-                    <img class="header-image" src="../static/images/edit-icon.jpg" alt="Edit icon">
                     <div class='grid-container2'>
                         <h2><span class="name">Duration:</span> <span class="value">{{activity['Duration']}}</span></h2>
                         <h2><span class="name">Elapsed Time:</span> <span class="value">{{activity['Elapsed Time']}}</span></h2>
@@ -81,7 +68,6 @@
                     </div>
                 </div>
                 <h1><span class="name">Splits</span></h1>
-                <img class="header-image3" style='display:none' id='editicon2' src="../static/images/edit-icon2.jpg" alt="Edit icon">
                 <button type="button" onclick="toggleCollapse('splits', this, ' Splits', 'editicon2')" class='splits-button'>View Splits</button>
                 {% if lap_html is none %}
                     <div class='splits' style="display:none; height:42px">
@@ -95,7 +81,6 @@
                 <button type="button" onclick="toggleCollapse('grid-container', this, ' Stats', null)" class='stats-button'>Hide</button>
                 <div class="grid-container">
                     <div class='hr'>
-                        <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
                         <h2><span class="container-title">Heart Rate:</span></h2>
                         <h2><span class="name">Avg HR:</span> <span class="value">{{activity['Avg HR']}} bpm</span></h2>
                         <h2><span class="name">Max HR:</span> <span class="value">{{activity['Max HR']}} bpm</span></h2>
@@ -103,7 +88,6 @@
                     </div>
                     {% if activity['Sport'] == 'Running' %}
                         <div class='steps'>
-                            <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
                             <h2><span class="container-title">Steps:</span></h2>
                             <h2><span class="name">Avg Cadence:</span> <span class="value">{{activity['Avg Cadence']}} spm</span></h2>
                             <h2><span class="name">Max Cadence:</span> <span class="value">{{activity['Max Cadence']}} spm</span></h2>
@@ -112,7 +96,6 @@
                         </div>
                     {% elif activity['Sport'] == 'Rowing' %}
                         <div class='strokes'>
-                            <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
                             <h2><span class="container-title">Strokes:</span></h2>
                             <h2><span class="name">Stroke Rate:</span> <span class="value">{{activity['Stroke Rate']}} spm</span></h2>
                             <h2><span class="name">Elapsed Stroke Rate:</span> <span class="value">{{activity['Elapsed Stroke Rate']}} spm</span></h2>
@@ -120,7 +103,6 @@
                         </div>
                     {% endif %}
                     <div class='calories'>
-                        <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
                         <h2><span class="container-title">Nutrition:</span></h2>
                         <h2><span class="name">Resting Calories:</span> <span class="value">{{activity['Resting Calories']}} cal</span></h2>
                         <h2><span class="name">Active Calories:</span> <span class="value">{{activity['Active Calories']}} cal</span></h2>
@@ -128,16 +110,11 @@
                         <h2><span class="name">Sweat Loss:</span> <span class="value">{{activity['Sweat Loss']}} ml</span></h2>
                     </div>
                     <div class='elevation'>
-                        <img class="header-image2" src="../static/images/edit-icon.jpg" alt="Edit icon">
                         <h2><span class="container-title">Elevation:</span></h2>
                         <h2><span class="name">Total Ascent:</span> <span class="value">{{activity['Total Ascent']}} ft</span></h2>
                         <h2><span class="name">Total Descent:</span> <span class="value">{{activity['Total Descent']}} ft</span></h2>
                     </div>
                 </div>
             </div>
-            {% with activity=activity %}
-                {% include 'editTitleModal.html' %}
-            {% endwith %}
         {% endfor %}
-    </body>
-</html>
+{% endblock %}

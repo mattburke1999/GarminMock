@@ -101,7 +101,7 @@ def preSingleDate(timestamp):
     activity_list_id = da.create_cookie(json.dumps(activity_list))
     session['activity_list'] = activity_list_id
     session['date_title'] = date_string
-    session['source'] = 'searchByDate'
+    # session['source'] = 'searchByDate'
     # Redirect or render a template based on the processing result
     print("ACTIVITY FOUND")
     return redirect(url_for('main.multiple_activity_route'))
@@ -130,11 +130,11 @@ def preMonthDetail(month, year):
     session['lap_html_list'] = lap_html_list_id
     month_string = pd.to_datetime(f'{month}/01/{year}').strftime('%B %Y')
     session['date_title'] = month_string
-    session['source'] = 'searchByMonth'
+    # session['source'] = 'searchByMonth'
     print("ACTIVITY FOUND")
     return redirect(url_for('main.multiple_activity_route'))
 
-def searchByMonth(month, year, button_pressed):
+def searchByMonth(month, year):
     # button_pressed = request.form['search']
     # month = request.form['month']
     # year = request.form['year']
@@ -151,23 +151,11 @@ def multiple_activity():
     lap_html_list = json.loads(da.get_cookie_value(lap_html_list_id))
     activity_list_id = session['activity_list']
     activity_list = json.loads(da.get_cookie_value(activity_list_id))
-    return render_template('multipleActivity.html', activity_list=activity_list, date_title = session['date_title'], lap_html_list=lap_html_list, source=session['source'], zip=zip)
+    return render_template('multipleActivity.html', activity_list=activity_list, date_title = session['date_title'], lap_html_list=lap_html_list, zip=zip)
 
 def show_searchByYear_form():
     return render_template('searchByYear.html')
 
-def editTitle():
-    new_title = request.form['title']
-    new_description = request.form['description']
-    new_date = request.form['date']
-    new_time = request.form['time']
-    new_timestamp = pd.to_datetime(f'{new_date} {new_time}')
-    activity_id = request.form['activity_id']
-    source = request.form['source']
-    old_date = pd.to_datetime(request.form['old_date'])
-    da.updateTitle(new_title, new_description, new_timestamp, activity_id)
-    if source == 'searchByDate':
-        return preSingleDate(old_date)
-    else:
-        return preMonthDetail(old_date.month, old_date.year)
+def default():
+    return render_template('base.html')
 

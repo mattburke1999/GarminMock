@@ -1,69 +1,30 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Search By Month</title>
-        <style>
-            body {
-                font-family: Arial, sans-serif;
-                background-color: #f4f4f4;
-                margin: 0;
-                padding: 0;
-                line-height: 1.6;
+{% extends "base.html" %}
+{% block title %}Search by Month{% endblock %}
+{% block head %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('.search-form input').on('input', function () {
+            if ($(this).val() !== '') {
+                $(this).addClass('has-input');
+            } else {
+                $(this).removeClass('has-input');
             }
-            .container {
-                width: 40%;
-                margin: auto;
-                overflow: hidden;
-                padding: 20px;
-                background-color: #fff;
-                border-radius: 5px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            }
-            h2 {
-                color: #333;
-                text-align: center;
-                padding-bottom: 20px;
-                border-bottom: 1px solid #ddd;
-            }
-            .search-form {
-                width: 80%; 
-                margin: 2em auto; 
-                padding: 3em;
-                border-radius: 0.5em;
-            }
-            .search-form input, .search-form button {
-                
-                padding: 1em;
-                margin-bottom: 1em;
-                border-radius: 0.5em;
-                border: 1px solid #ddd;
-            }
-            .search-form input {
-                width: 93%;
-            }
-            .search-form button {
-                width: 100%;
-                color: #fff;
-                background-color: #007BFF;
-                cursor: pointer;
-            }
-            .search-form button:hover {
-                background-color: #0056b3;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h2>Search for Activities By Month</h2>
-            <div class="search-form">
-                <form method="get" action="/searchByMonth">
-                    <input type="text" id="month" name="month" placeholder="Enter Month" required>
-                    <input type="text" id="year" name="year" placeholder="Enter Year" required>
-                    <button type="submit" id="searchSummary" name="search" value="summary">Get Summary of Month</button>
-                    <button type="submit" id="searchDetail" name="search" value="detail">Get Details of Month</button>
-                    <button type="submit" id="searchWeekly" name="search" value="recap">Get Recaps of Weeks for Month</button>
-                </form>
-            </div>
+        });
+    });
+</script>
+{% endblock %}
+{% block body %}
+    <div class="search-container">
+        <h2 class="search-h2">Search for Activities By Month</h2>
+        <div class="search-form">
+            <form method="get" action="/ByMonth">
+                <input type="text" id="month" name="month" placeholder="Enter Month" required>
+                <input type="text" id="year" name="year" placeholder="Enter Year" required>
+                <button type="submit" id="searchSummary" name="search" value="summary">Get Summary of Month</button>
+                <button type="submit" id="searchDetail" name="search" value="detail">Get Details of Month</button>
+                <button type="submit" id="searchWeekly" name="search" value="recap">Get Recaps of Weeks for Month</button>
+            </form>
         </div>
-    </body>
-</html>
+    </div>
+{% endblock %}

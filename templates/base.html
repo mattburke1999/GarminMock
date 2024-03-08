@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>{% block title %}GarminMock{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/multipleActivity.css">
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+    <nav class = "menuBar">
+        <h1 class="WebName">GarminMock</h1>
+        <a href = "{{ url_for('main.home_route') }}">Home</a>
+        <a href = "{{ url_for('main.default_route') }}">Calendar</a>
+        <a href = "{{ url_for('main.default_route') }}">Profile</a>
+    </nav>
+{% block body %}
+    <div class = "notFound">
+        <h1> The page you are looking for was not found or in development. </h1>
+    </div>
+
+{% endblock %}
+</body>
+</html>

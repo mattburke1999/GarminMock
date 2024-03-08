@@ -1,7 +1,7 @@
 from flask import Flask
 from routes import bp  # Assuming routes.py defines a Blueprint called bp
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv(override=True)
 import warnings
 warnings.filterwarnings("ignore")
 
