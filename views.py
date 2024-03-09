@@ -159,3 +159,7 @@ def show_searchByYear_form():
 def default():
     return render_template('base.html')
 
+def logout():
+    session['logged_in'] = False
+    return redirect(url_for('main.show_login_form_route'))
+

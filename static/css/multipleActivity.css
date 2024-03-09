@@ -228,24 +228,47 @@ h3 {
     padding-right: 2px;
 }
 .menuBar {
+    position: fixed;
+    top: 0;
+    width: 100%;
     display: flex;
     justify-content: space-around;
     background-color: #333;
     padding: 10px;
     color: white;
+    z-index: 1000;
+}
+.logout {
+    padding: 10px;
+    border: 2px solid white;
+    border-radius: 10px;
+    background-color: #33A5FF;
+}
+.menuBar a.logout {
+    padding-right: 20px;
+}
+.menuBar a.logout:hover {
+    background-color: white;
 }
 .menuBar a {
     color: white;
     text-decoration: none;
     padding: 10px;
+    font-family: comic sans ms, sans-serif;
+    font-weight: normal;
 }
 .menuBar a:hover {
-    background-color: #ddd;
+    background-color: #33A5FF;
     color: black;
     border-radius: 5px;
 }
+.links {
+    display: flex;
+    justify-content: space-around;
+    flex-grow: 1;
+}
 .WebName {
-    margin-right: 0;
+    padding: 10px;
     margin-top: 0;
     color:#0056b3;
 }

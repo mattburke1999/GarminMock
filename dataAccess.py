@@ -60,20 +60,13 @@ class DataAccess:
         return
     
     def create_cookie(self, value, expire=3600):
-        # Generate a unique key for the cookie
         cookie_key = str(uuid.uuid4())
-        # Store the value in Redis with an expiration time
         self.redis_cnxn.setex(cookie_key, expire, value)
-        # Return the unique key
         return cookie_key
 
     def get_cookie_value(self, id):
-        # Atomically get and delete the value from Redis
         value = self.redis_cnxn.get(id)
         if value:
-            print('got value from redis')
-            # self.redis_cnxn.delete(id)
-            # Convert bytes to string if necessary
             return value.decode('utf-8')
         print('no value from redis')
         return None

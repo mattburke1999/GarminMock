@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from views import show_register, register, login, check_login, home, homePage, show_login_form,\
     show_searchByDate_form, searchByDate, multiple_activity, show_searchByMonth_form, searchByMonth,\
-    show_searchByYear_form, default
+    show_searchByYear_form, default, logout
 
 
 bp = Blueprint('main', __name__)
@@ -73,3 +73,7 @@ def show_searchByYear_form_route():
 @login_required
 def default_route():
     return default()
+
+@bp.route('/logout', methods=['GET'])
+def logout_route():
+    return logout()
