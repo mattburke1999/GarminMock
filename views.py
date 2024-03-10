@@ -163,3 +163,9 @@ def logout():
     session['logged_in'] = False
     return redirect(url_for('main.show_login_form_route'))
 
+def activity(activity_id):
+    session_info, lap_info = da.get_activity_by_id(activity_id)
+    activity_dict = dt.prepare_multiple_activities(session_info)[0]
+    lap_html = dt.prepare_lap_info(lap_info, session_info)[0]
+    return render_template('singleActivity.html', activity=activity_dict, lap_html=lap_html)
+

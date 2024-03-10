@@ -126,3 +126,12 @@ class DataAccess:
         cursor.close()
         cnxn.close()
         return
+    
+    def get_activity_by_id(self, activity_id):
+        cnxn = self.connect_to_postgres()
+        query = 'select * from session_info(%s, null, null, null)'
+        session_info = pd.read_sql_query(query, cnxn, params=[activity_id])
+        query = 'select * from lap_info(%s, null, null, null)'
+        lap_info = pd.read_sql_query(query, cnxn, params=[activity_id])
+        cnxn.close()
+        return session_info, lap_info

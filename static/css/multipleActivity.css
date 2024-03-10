@@ -238,6 +238,9 @@ h3 {
     color: white;
     z-index: 1000;
 }
+.empty_space{
+    padding-top: 55px; /* Adjust as needed */
+}
 .logout {
     padding: 10px;
     border: 2px solid white;
@@ -401,6 +404,9 @@ a {
     text-decoration: underline;
     font-weight: bold;
     color: #292E2F; 
+}
+.titleName:hover {
+    color: #0935F9;
 }
 .name {
     font-size: 18px;
