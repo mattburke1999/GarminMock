@@ -1,26 +1,5 @@
 {% extends "base.html" %}
 {% block title %}Search by Month{% endblock %}
-{% block head %}
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    function handleInput() {
-        var inputValue = $(this).val();
-        if (inputValue !== '' && inputValue !== 'Enter Month' && inputValue !== 'Enter Year') {
-            $(this).addClass('has-input');
-        } else {
-            $(this).removeClass('has-input');
-        }
-    }
-
-    $(window).on('pageshow', function () {
-        $('.search-form input').each(handleInput);
-    });
-
-    $(document).ready(function () {
-        $('.search-form input').on('input', handleInput);
-    });
-</script>
-{% endblock %}
 {% block body %}
     <div class="search-container">
         <h2 class="search-h2">Search for Activities By Month</h2>

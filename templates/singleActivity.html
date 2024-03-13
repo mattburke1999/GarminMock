@@ -25,91 +25,97 @@
     </script>
 {% endblock %}
 {% block body %}
-    <div class='empty_space'></div>
-    <div class='header'>
-        <div class='topHeader'>
-            {% if activity['Sport'] == 'Running' %}
-                <img src="/static/images/running-icon.jpg" alt="Running icon">
-            {% elif activity['Sport'] == 'Cycling' %}
-                <img src="/static/images/cycling-icon.png" alt="Running icon">
-            {% elif activity['Sport'] == 'Rowing' %}
-                <img src="/static/images/rowing-icon.jpg" alt="Running icon">
-            {% endif %}
-            <div>
-                <h1><span class="date-name">{{activity.Date}}</span></h1>
-                <h1><span class="sport-name">{{activity.DisplaySport}}</span></h1>
+    <div class='containerSingle'>
+        <div class='header2'>
+            <div class='topHeader'>
+                {% if activity['Sport'] == 'Running' %}
+                    <img src="/static/images/running-icon.jpg" alt="Running icon">
+                {% elif activity['Sport'] == 'Cycling' %}
+                    <img src="/static/images/cycling-icon.png" alt="Running icon">
+                {% elif activity['Sport'] == 'Rowing' %}
+                    <img src="/static/images/rowing-icon.jpg" alt="Running icon">
+                {% endif %}
+                <div>
+                    <h1><span class="date-name">{{activity.Date}}</span></h1>
+                    <h1><span class="sport-name">{{activity.DisplaySport}}</span></h1>
+                </div>
+            </div>
+            <h1><span class="titleName">{{activity['Activity Title']}}</span></h1>
+            <h3><span class = 'name'>Description:</span> <span class = 'value'>{{activity['Description']}}</span></h3>
+        </div>
+        <div class='times2'>
+            <div class='grid-container2'>
+                <h2><span class="name">Duration:</span> <span class="value">{{activity['Duration']}}</span></h2>
+                <h2><span class="name">Elapsed Time:</span> <span class="value">{{activity['Elapsed Time']}}</span></h2>
+                {% if activity['Sport'] == 'Running'%}                
+                    <h2><span class="name">Avg Pace:</span> <span class="value">{{activity['Pace']}} /mi</span></h2>
+                    <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} /mi</span></h2>
+                {% elif activity['Sport'] == 'Cycling'%}
+                    <h2><span class="name">Avg Speed:</span> <span class="value">{{activity['Speed']}} mph</span></h2>
+                    <h2><span class="name">Elapsed Speed:</span> <span class="value">{{activity['Elapsed Speed']}} mph</span></h2>
+                {% elif activity['Sport'] == 'Rowing'%}
+                    <h2><span class="name">Pace:</span> <span class="value">{{activity['Pace']}} /500m</span></h2>
+                    <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} /500m</span></h2>
+                {% endif %}
+                {% if activity['Sport'] in ('Running', 'Cycling')%}
+                    <h2><span class="name">Distance:</span> <span class="value">{{activity['Distance']}} miles</span></h2>
+                {% elif activity['Sport'] == 'Rowing' %}
+                    <h2><span class="name">Distance:</span> <span class="value">{{activity['Distance']}} m</span></h2>
+                {% endif %}
             </div>
         </div>
-        <h1><span class="titleName">{{activity['Activity Title']}}</span></h1>
-        <h3><span class = 'name'>Description:</span> <span class = 'value'>{{activity['Description']}}</span></h3>
-    </div>
-    <div class='times'>
-        <div class='grid-container2'>
-            <h2><span class="name">Duration:</span> <span class="value">{{activity['Duration']}}</span></h2>
-            <h2><span class="name">Elapsed Time:</span> <span class="value">{{activity['Elapsed Time']}}</span></h2>
-            {% if activity['Sport'] == 'Running'%}                
-                <h2><span class="name">Avg Pace:</span> <span class="value">{{activity['Pace']}} /mi</span></h2>
-                <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} /mi</span></h2>
-            {% elif activity['Sport'] == 'Cycling'%}
-                <h2><span class="name">Avg Speed:</span> <span class="value">{{activity['Speed']}} mph</span></h2>
-                <h2><span class="name">Elapsed Speed:</span> <span class="value">{{activity['Elapsed Speed']}} mph</span></h2>
-            {% elif activity['Sport'] == 'Rowing'%}
-                <h2><span class="name">Pace:</span> <span class="value">{{activity['Pace']}} /500m</span></h2>
-                <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} /500m</span></h2>
-            {% endif %}
-            {% if activity['Sport'] in ('Running', 'Cycling')%}
-                <h2><span class="name">Distance:</span> <span class="value">{{activity['Distance']}} miles</span></h2>
-            {% elif activity['Sport'] == 'Rowing' %}
-                <h2><span class="name">Distance:</span> <span class="value">{{activity['Distance']}} m</span></h2>
+        <div id="map-container" style="width: 96%; height: 100%; margin: 0 auto;">
+            {% if folium_map is not none %}
+                {{folium_map|safe}}
             {% endif %}
         </div>
-    </div>
-    <h1><span class="name">Splits</span></h1>
-    <button type="button" onclick="toggleCollapse('splits', this, ' Splits', 'editicon2')" class='splits-button'>View Splits</button>
-    {% if lap_html is none %}
-        <div class='splits' style="display:none; height:42px">
-            <h2>No Split Data to Show</h2>
-    {% else %}
-        <div class='splits' style="display:none">
-            {{lap_html|safe}}
-    {% endif %}
-    </div>
-    <h1><span class="name">Stats</span></h1>
-    <button type="button" onclick="toggleCollapse('grid-container', this, ' Stats', null)" class='stats-button'>Hide</button>
-    <div class="grid-container">
-        <div class='hr'>
-            <h2><span class="container-title">Heart Rate:</span></h2>
-            <h2><span class="name">Avg HR:</span> <span class="value">{{activity['Avg HR']}} bpm</span></h2>
-            <h2><span class="name">Max HR:</span> <span class="value">{{activity['Max HR']}} bpm</span></h2>
-            <h2><span class="name">Recovery HR:</span> <span class="value">{{activity['Recovery HR']}} bpm</span></h2>
-        </div>
-        {% if activity['Sport'] == 'Running' %}
-            <div class='steps'>
-                <h2><span class="container-title">Steps:</span></h2>
-                <h2><span class="name">Avg Cadence:</span> <span class="value">{{activity['Avg Cadence']}} spm</span></h2>
-                <h2><span class="name">Max Cadence:</span> <span class="value">{{activity['Max Cadence']}} spm</span></h2>
-                <h2><span class="name">Number of Steps:</span> <span class="value">{{activity['Steps']}}</span></h2>
-                <h2><span class="name">Avg Stride Length:</span> <span class="value">{{activity['Avg Stride Length']}} m</span></h2>
-            </div>
-        {% elif activity['Sport'] == 'Rowing' %}
-            <div class='strokes'>
-                <h2><span class="container-title">Strokes:</span></h2>
-                <h2><span class="name">Stroke Rate:</span> <span class="value">{{activity['Stroke Rate']}} spm</span></h2>
-                <h2><span class="name">Elapsed Stroke Rate:</span> <span class="value">{{activity['Elapsed Stroke Rate']}} spm</span></h2>
-                <h2><span class="name">Number of Strokes:</span> <span class="value">{{activity['Total Strokes']}}</span></h2>
-            </div>
+        <h1><span class="nameSingle">Splits</span></h1>
+        <button type="button" onclick="toggleCollapse('splits2', this, ' Splits')" class='splits-button2'>View Splits</button>
+        {% if lap_html is none %}
+            <div class='splits2' style="display:none; height:42px">
+                <h2>No Split Data to Show</h2>
+        {% else %}
+            <div class='splits2' style="display:none">
+                {{lap_html|safe}}
         {% endif %}
-        <div class='calories'>
-            <h2><span class="container-title">Nutrition:</span></h2>
-            <h2><span class="name">Resting Calories:</span> <span class="value">{{activity['Resting Calories']}} cal</span></h2>
-            <h2><span class="name">Active Calories:</span> <span class="value">{{activity['Active Calories']}} cal</span></h2>
-            <h2><span class="name">Total Calories:</span> <span class="value">{{activity['Total Calories']}} cal</span></h2>
-            <h2><span class="name">Sweat Loss:</span> <span class="value">{{activity['Sweat Loss']}} ml</span></h2>
         </div>
-        <div class='elevation'>
-            <h2><span class="container-title">Elevation:</span></h2>
-            <h2><span class="name">Total Ascent:</span> <span class="value">{{activity['Total Ascent']}} ft</span></h2>
-            <h2><span class="name">Total Descent:</span> <span class="value">{{activity['Total Descent']}} ft</span></h2>
+        <h1><span class="nameSingle">Stats</span></h1>
+        <button type="button" onclick="toggleCollapse('grid-container2', this, ' Stats')" class='stats-button2'>Hide</button>
+        <div class="grid-container2">
+            <div class='hr2'>
+                <h2><span class="container-title">Heart Rate:</span></h2>
+                <h2><span class="name">Avg HR:</span> <span class="value">{{activity['Avg HR']}} bpm</span></h2>
+                <h2><span class="name">Max HR:</span> <span class="value">{{activity['Max HR']}} bpm</span></h2>
+                <h2><span class="name">Recovery HR:</span> <span class="value">{{activity['Recovery HR']}} bpm</span></h2>
+            </div>
+            {% if activity['Sport'] == 'Running' %}
+                <div class='steps2'>
+                    <h2><span class="container-title">Steps:</span></h2>
+                    <h2><span class="name">Avg Cadence:</span> <span class="value">{{activity['Avg Cadence']}} spm</span></h2>
+                    <h2><span class="name">Max Cadence:</span> <span class="value">{{activity['Max Cadence']}} spm</span></h2>
+                    <h2><span class="name">Number of Steps:</span> <span class="value">{{activity['Steps']}}</span></h2>
+                    <h2><span class="name">Avg Stride Length:</span> <span class="value">{{activity['Avg Stride Length']}} m</span></h2>
+                </div>
+            {% elif activity['Sport'] == 'Rowing' %}
+                <div class='strokes2'>
+                    <h2><span class="container-title">Strokes:</span></h2>
+                    <h2><span class="name">Stroke Rate:</span> <span class="value">{{activity['Stroke Rate']}} spm</span></h2>
+                    <h2><span class="name">Elapsed Stroke Rate:</span> <span class="value">{{activity['Elapsed Stroke Rate']}} spm</span></h2>
+                    <h2><span class="name">Number of Strokes:</span> <span class="value">{{activity['Total Strokes']}}</span></h2>
+                </div>
+            {% endif %}
+            <div class='calories2'>
+                <h2><span class="container-title">Nutrition:</span></h2>
+                <h2><span class="name">Resting Calories:</span> <span class="value">{{activity['Resting Calories']}} cal</span></h2>
+                <h2><span class="name">Active Calories:</span> <span class="value">{{activity['Active Calories']}} cal</span></h2>
+                <h2><span class="name">Total Calories:</span> <span class="value">{{activity['Total Calories']}} cal</span></h2>
+                <h2><span class="name">Sweat Loss:</span> <span class="value">{{activity['Sweat Loss']}} ml</span></h2>
+            </div>
+            <div class='elevation2'>
+                <h2><span class="container-title">Elevation:</span></h2>
+                <h2><span class="name">Total Ascent:</span> <span class="value">{{activity['Total Ascent']}} ft</span></h2>
+                <h2><span class="name">Total Descent:</span> <span class="value">{{activity['Total Descent']}} ft</span></h2>
+            </div>
         </div>
     </div>
 {% endblock %}

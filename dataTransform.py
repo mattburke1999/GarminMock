@@ -1,4 +1,5 @@
 import pandas as pd
+import folium
 
 mile_dist = 1609.344
 
@@ -58,10 +59,9 @@ class DataTransform:
         activity_dict['Elapsed Stroke Rate'] = float(round((total_cycles / (elapsed_time / 60)),2))
         return activity_dict
 
-    def lap_dfs_to_htmls(self, lap_df, session_df):
-        activity_ids = session_df['activity_id'].tolist()
+    def lap_dfs_to_htmls(self, lap_df):
         lap_html_list = []
-        for activity_id in activity_ids:
+        for activity_id in lap_df['activity_id'].unique():
             lap = lap_df[lap_df['activity_id'] == activity_id]
             if len(lap) == 0:
                 lap_html_list.append(None)
@@ -89,7 +89,10 @@ class DataTransform:
                 return f'{hours}:{minutes}:0{round(seconds,3)}'
             return f'{hours}:{minutes}:{round(seconds,3)}'
 
-    def prepare_lap_info(self, df, session_df):
+    def prepare_lap_info(self, df, activity_id_list):
+        # drop all rows where df['activity_id'] is not in activity_id_list
+        df = df[df['activity_id'].isin(activity_id_list)]
+        
         cols = df.columns.tolist()
         df['lap'] = df['lap_num']
         df['distance'] = df['total_distance'].apply(lambda x: round(x/mile_dist, 2))
@@ -114,7 +117,7 @@ class DataTransform:
         cols.remove('activity_id')
         df = df.sort_values(by=['start_time', 'lap'])
         df = df.drop(cols, axis=1)
-        html_list = self.lap_dfs_to_htmls(df, session_df)
+        html_list = self.lap_dfs_to_htmls(df)
         return html_list
 
     def prepare_multiple_activities(self, df):
@@ -166,3 +169,43 @@ class DataTransform:
                 activity_dict = self.prepare_rowing(activity, activity_dict)
             activity_list.append(activity_dict)
         return activity_list
+    
+    def build_map(self, record_info):
+        record_info = record_info[(record_info['latitude'] != -1) & (record_info['longitude'] != -1)]
+        # drop rows wher lat or long is na
+        record_info = record_info.dropna(subset=['latitude', 'longitude'])
+        map = None
+        if len(record_info) > 0:
+            min_lat = record_info['latitude'].min()
+            min_long = record_info['longitude'].min()
+            max_lat = record_info['latitude'].max()
+            max_long = record_info['longitude'].max()
+
+
+            avg_lat = (min_lat + max_lat) / 2
+            avg_long = (min_long + max_long) / 2
+            map = folium.Map(location=[avg_lat, avg_long])
+            map.fit_bounds([[min_lat, min_long], [max_lat, max_long]])
+            # creata a list of lat and long tuples
+            points = list(zip(record_info['latitude'], record_info['longitude']))
+            map.add_child(folium.PolyLine(points, color="blue", weight=2.5, opacity=1))
+            # add markers for start and end of activity
+            folium.Marker([record_info['latitude'].iloc[0], record_info['longitude'].iloc[0]], popup='Start').add_to(map)
+            folium.Marker([record_info['latitude'].iloc[-1], record_info['longitude'].iloc[-1]], popup='End').add_to(map)
+        return map
+    
+    def prepare_record_info(self, record_info, activity_id_list):
+        map_htmls = []
+        record_info = record_info[record_info['activity_id'].isin(activity_id_list)]
+        record_info = record_info.sort_values('timestamp')
+        for activity_id in record_info['activity_id'].unique():
+            activity_df = record_info[record_info['activity_id'] == activity_id]
+            map_folium = self.build_map(activity_df)
+            if map_folium:
+                map_html = map_folium._repr_html_().replace('padding-bottom:60%;', 'padding-bottom:30%;')
+            else:
+                map_html = None
+            map_htmls.append(map_html)
+        return map_htmls
+
+    

@@ -5,7 +5,7 @@ body {
     background: linear-gradient(to right, #f0f0f0, #ffffff);
     color: #333;
 }
-.container {
+.containerMult {
     width: 60%; /* Decrease the width */
     margin: 10px auto; /* Increase the vertical margin */
     padding: 20px;
@@ -36,7 +36,8 @@ body {
 }
 .search-container {
     width: 40%;
-    margin: auto;
+    margin-top:45px;
+    margin-inline: auto;
     overflow: hidden;
     padding: 20px;
     background-color: #fff;
@@ -66,7 +67,7 @@ body {
     border-radius: 10px;
     transition: all 0.3s ease;
 }
-.container:hover {
+.containerMult:hover {
     box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
 }
 .grid-container {
@@ -97,6 +98,7 @@ h1, .stats-button, .splits-button {
     text-align: center;
     padding-bottom: 20px;
     border-bottom: 1px solid #ddd;
+    font-family: comic sans ms, sans-serif;
 }
 .search-form {
     width: 82%; 
@@ -110,20 +112,18 @@ h1, .stats-button, .splits-button {
     margin-bottom: 1em;
     border-radius: 0.5em;
     border: 1px solid #ddd;
-    font-family: 'Courier New', monospace;
+    font-family: comic sans ms, sans-serif;
 }
 .search-form input {
     width: 93%;
     font-size: 16px;
-}
-.search-form input.has-input {
-    font-weight: bold;
 }
 .search-form button {
     width: 100%;
     color: #fff;                
     background-color: #007BFF;
     cursor: pointer;
+    font-family: 'Roboto', sans-serif;
 }
 .search-form button:hover {
     background-color: #0056b3;
@@ -186,6 +186,39 @@ button:hover {
     transition: all 0.3s ease;
     position: relative;
 }
+.splits-button2, .stats-button2 {
+    border: none;
+    padding-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 2%;
+    height: 15px;
+    border-radius: 5px;
+    background-color: #2A75B4;
+    color: #fff;
+    font-size: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Courier New', Courier, monospace;
+}
+.header2, .times2, .hr2, .steps2,.strokes2, .calories2, .elevation2, .splits2 {
+    margin-bottom: 20px;
+    padding-left: 15px;
+    border-radius: 5px;
+    background-color: #EFEFEF;
+    box-shadow: 0px 0px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    width: 95%;
+    margin-inline: auto;
+}
+.grid-container2{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 5px;
+    column-gap: 22px;
+    width: 98%;
+    margin-inline: auto;
+}
 .home_link {
     display: inline-block;
     margin: 10px;
@@ -238,8 +271,18 @@ h3 {
     color: white;
     z-index: 1000;
 }
-.empty_space{
-    padding-top: 55px; /* Adjust as needed */
+.containerSingle{
+    margin: 10px auto;
+    padding-top: 55px;
+    width: 93%;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+
+}
+.containerSingle:hover {
+    box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
 }
 .logout {
     padding: 10px;
@@ -248,7 +291,7 @@ h3 {
     background-color: #33A5FF;
 }
 .menuBar a.logout {
-    padding-right: 20px;
+    margin-right: 1%;
 }
 .menuBar a.logout:hover {
     background-color: white;
@@ -413,6 +456,12 @@ a {
     font-weight: bold;
     color: #292E2F; 
 }
+.nameSingle {
+    font-size: 18px;
+    font-weight: bold;
+    color: #292E2F; 
+    padding-left: 2%;
+}
 .date-name, .sport-name {
     font-size: 22px;
     font-weight: bold;
@@ -438,6 +487,11 @@ a {
     border-collapse: collapse;
 }
 .splits{
+    overflow-x: auto;
+    overflow-y: auto;
+    height: 200px;
+}
+.splits2{
     overflow-x: auto;
     overflow-y: auto;
     height: 200px;

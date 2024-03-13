@@ -88,18 +88,21 @@ def show_searchByDate_form():
     return render_template('searchByDate.html')
 
 def preSingleDate(timestamp):
-    session_df, lap_df = da.get_activity_info_by_date(timestamp.date())
+    session_df, lap_df, record_info = da.get_activity_info_by_date(timestamp.date())
     if len(session_df) == 0:
         print("NO ACTIVITY FOUND")
         return render_template('searchByDate.html')
     activity_list = dt.prepare_multiple_activities(session_df)
-    lap_html_list = dt.prepare_lap_info(lap_df, session_df)
+    lap_html_list = dt.prepare_lap_info(lap_df, list(set(session_df['activity_id'])))
+    record_html_list = dt.prepare_record_info(record_info, list(set(session_df['activity_id'])))
     date_string = timestamp.strftime('%B %d %Y')
     ## activity list and lap html list are too large to store in session, so we store them in the database and store the id in the session
     lap_html_list_id = da.create_cookie(json.dumps(lap_html_list))
     session['lap_html_list'] = lap_html_list_id
     activity_list_id = da.create_cookie(json.dumps(activity_list))
     session['activity_list'] = activity_list_id
+    record_html_list_id = da.create_cookie(json.dumps(record_html_list))
+    session['record_html_list'] = record_html_list_id
     session['date_title'] = date_string
     # session['source'] = 'searchByDate'
     # Redirect or render a template based on the processing result
@@ -117,17 +120,20 @@ def show_searchByMonth_form():
 def preMonthDetail(month, year):
     start_date = pd.Timestamp(f'{year}-{month}-01')
     end_date = pd.Timestamp(f'{year}-{month}-01') + pd.offsets.MonthEnd(0)
-    session_df, lap_df = da.get_activity_info_by_date_range(start_date.date(), end_date.date())
+    session_df, lap_df, record_df = da.get_activity_info_by_date_range(start_date.date(), end_date.date())
     if len(session_df)==0:
         print("NO ACTIVITY FOUND")
         return render_template('searchByMonth.html')
     activity_list = dt.prepare_multiple_activities(session_df)
-    lap_html_list = dt.prepare_lap_info(lap_df, session_df)
+    lap_html_list = dt.prepare_lap_info(lap_df, list(set(session_df['activity_id'])))
+    record_html_list = dt.prepare_record_info(record_df, list(set(session_df['activity_id'])))
     ## activity list and lap html list are too large to store in session, so we store them in the database and store the id in the session
     activity_list_id = da.create_cookie(json.dumps(activity_list))
     session['activity_list'] = activity_list_id
     lap_html_list_id = da.create_cookie(json.dumps(lap_html_list))
     session['lap_html_list'] = lap_html_list_id
+    record_html_list_id = da.create_cookie(json.dumps(record_html_list))
+    session['record_html_list'] = record_html_list_id
     month_string = pd.to_datetime(f'{month}/01/{year}').strftime('%B %Y')
     session['date_title'] = month_string
     # session['source'] = 'searchByMonth'
@@ -151,7 +157,9 @@ def multiple_activity():
     lap_html_list = json.loads(da.get_cookie_value(lap_html_list_id))
     activity_list_id = session['activity_list']
     activity_list = json.loads(da.get_cookie_value(activity_list_id))
-    return render_template('multipleActivity.html', activity_list=activity_list, date_title = session['date_title'], lap_html_list=lap_html_list, zip=zip)
+    record_html_list_id = session['record_html_list']
+    folium_maps = json.loads(da.get_cookie_value(record_html_list_id))
+    return render_template('multipleActivity.html', activity_list=activity_list, date_title = session['date_title'], lap_html_list=lap_html_list, folium_maps = folium_maps, zip=zip)
 
 def show_searchByYear_form():
     return render_template('searchByYear.html')
@@ -164,8 +172,9 @@ def logout():
     return redirect(url_for('main.show_login_form_route'))
 
 def activity(activity_id):
-    session_info, lap_info = da.get_activity_by_id(activity_id)
+    session_info, lap_info, record_info = da.get_activity_by_id(activity_id)
     activity_dict = dt.prepare_multiple_activities(session_info)[0]
-    lap_html = dt.prepare_lap_info(lap_info, session_info)[0]
-    return render_template('singleActivity.html', activity=activity_dict, lap_html=lap_html)
+    lap_html = dt.prepare_lap_info(lap_info, list(set(session_info['activity_id'])))[0]
+    folium_map = dt.prepare_record_info(record_info, list(set(session_info['activity_id'])))[0]
+    return render_template('singleActivity.html', activity=activity_dict, lap_html=lap_html, folium_map=folium_map)
 

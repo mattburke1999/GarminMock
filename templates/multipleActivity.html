@@ -27,8 +27,8 @@
     {% block body %}
         <div id = 'modalBackdrop' class = 'modal-backdrop'></div>
         <h1 class ='pageTitle'>Activities for {{date_title}}</h1>
-        {% for activity, lap_html in zip(activity_list, lap_html_list) %}
-            <div class="container">
+        {% for activity, lap_html, folium_map in zip(activity_list, lap_html_list, folium_maps) %}
+            <div class="containerMult">
                 <div class='header'>
                     <div class='topHeader'>
                         {% if activity['Sport'] == 'Running' %}
@@ -66,6 +66,11 @@
                             <h2><span class="name">Distance:</span> <span class="value">{{activity['Distance']}} m</span></h2>
                         {% endif %}
                     </div>
+                </div>
+                <div id="map-container" style="width: 100%; height: 45%; margin: 0 auto;">
+                    {% if folium_map is not none %}
+                        {{folium_map|safe}}
+                    {% endif %}
                 </div>
                 <h1><span class="name">Splits</span></h1>
                 <button type="button" onclick="toggleCollapse('splits', this, ' Splits', 'editicon2')" class='splits-button'>View Splits</button>
