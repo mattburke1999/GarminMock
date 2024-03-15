@@ -3,11 +3,13 @@ from dataAccess import DataAccess
 from dataTransform import DataTransform
 import os
 import smtplib
+import calendar
 from functools import wraps
 import pandas as pd
 import json
 import redis
 
+calendar.setfirstweekday(calendar.SUNDAY)
 redis_cnxn = redis.Redis(host='localhost', port=6379, db=0, password = os.environ.get('redis_password'))
 
 da = DataAccess(redis_cnxn)
@@ -177,4 +179,40 @@ def activity(activity_id):
     lap_html = dt.prepare_lap_info(lap_info, list(set(session_info['activity_id'])))[0]
     folium_map = dt.prepare_record_info(record_info, list(set(session_info['activity_id'])))[0]
     return render_template('singleActivity.html', activity=activity_dict, lap_html=lap_html, folium_map=folium_map)
+
+def get_calendar():
+    month = session.get('month', 0)
+    year = session.get('year', 0)
+    # print(f"Month: {month}, Year: {year}")
+    today = pd.Timestamp.now()
+    current_month = today.strftime('%B %Y')
+    if year == 0 and month == 0:
+        month_string = current_month
+        print("NO MONTH OR YEAR")
+    else:
+        print("MONTH AND YEAR FOUND")
+        if month == 0:
+            month = 12
+            year -= 1
+        elif month == 13:
+            month = 1
+            year += 1
+        month_date = pd.to_datetime(f'{month}/01/{year}')
+        month_string = month_date.strftime('%B %Y')
+        print(month_string)
+    
+    print(month_string)
+    # Generate calendar data for current month
+    cal = calendar.monthcalendar(year, month)
+    cal = [['--' if day == 0 else day for day in week] for week in cal]
+    # activity_info = da.get_calendar_info(year, month)
+    # if len(activity_info) > 0:
+    #     activity_list = dt.prepare_calendar_info(activity_info, cal)
+    
+    return render_template('calendar.html', calendar=cal, calendar_title=month_string, month=month, year=year, current_month=current_month)
+
+def switch_month(year, month):
+    session['month'] = month
+    session['year'] = year
+    return redirect(url_for('main.calendar_route'))
 

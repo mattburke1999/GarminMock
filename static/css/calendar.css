@@ -1,0 +1,63 @@
+table {
+    width: 95%;
+    margin-bottom: 10%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.calendar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.calendarTitle{
+    font-size: 40px;
+    font-family: comic sans ms, sans-serif;
+    margin-top: 3%;
+    color: #225bb6;
+}
+td, th {
+    position: relative;
+    padding: 20px;
+    border: 2px solid #000; /* adjust as needed */
+    border-radius: 10px;
+}
+.day {
+    position: absolute;
+    top: 7px; /* adjust as needed */
+    left: 7px; /* adjust as needed */
+    font-size: 20px;
+}
+.activ_text{
+    font-size: 10px;
+    font-family: comic sans ms, sans-serif;
+    padding-left: 5px;
+}
+.activity {
+    border: 1.5px solid #0a9e4a;
+    border-radius: 5px;
+    background-color:#7ed9a5;
+
+}
+.distance {
+    margin-right: 4px; /* adjust as needed */
+}
+.activity:hover {
+    background-color: #4ab478;
+}
+td {
+    padding-left: 10px;
+    padding-top: 35px;
+    padding-right: 10px;
+    padding-bottom: 35px;
+    height: 20%;
+}
+
+th {
+    background-color: #f2f2f2;
+    color: #333;
+    font-weight: bold;
+}
+
+td:hover {
+    background-color: #f2f2f2;
+}

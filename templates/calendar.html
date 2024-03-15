@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block title %}Activities{% endblock %}
+        {% block head %}
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css') }}">
+        {% endblock %}
+{% block body %}
+    <h1>Calendar</h1>
+    
+    <h2 class = "calendarTitle">{{ calendar_title }}</h2>
+
+    <a href="{{ url_for('main.switch_month_route', year=year, month=month-1) }}">Previous Month</a>
+    {% if calendar_title != current_month%}
+        <a href="{{ url_for('main.switch_month_route', year=year, month=month+1) }}">Next Month</a>
+    {% endif %}
+    <div class = "calendar">
+        <table>
+            <tr>
+                <th class='name'>Sun</th>
+                <th class='name'>Mon</th>
+                <th class='name'>Tue</th>
+                <th class='name'>Wed</th>
+                <th class='name'>Thu</th>
+                <th class='name'>Fri</th>
+                <th class='name'>Sat</th>
+            </tr>
+            {% for week in calendar %}
+            <tr>
+                {% for day in week %}
+                <td>
+                    <h3 class='day'>{{ day }}</h3>
+                    <div class='activity'>
+                        <h3 class='activ_text'> Running - Running Activity</h3>
+                        <h3 class='activ_text'> <span class="distance">3.23 miles</span> <span class="time">21 min 30 sec</span> </h3>                    </div>
+                </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}
