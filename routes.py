@@ -84,9 +84,11 @@ def activity_route(activity_id):
     return activity(activity_id)
 
 @bp.route('/calendar/', methods=['GET'])
+@login_required
 def calendar_route():
     return get_calendar()
 
 @bp.route('/switch_month/<int:year>/<int:month>')
+@login_required
 def switch_month_route(year, month):
    return switch_month(year, month)
