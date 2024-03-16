@@ -135,3 +135,9 @@ class DataAccess:
             record_info = pd.read_sql_query(query, cnxn, params=[activity_id])
         
         return session_info, lap_info, record_info
+    
+    def get_calendar_info(self, year, month):
+        with self.connect_to_postgres() as cnxn:
+            query = 'select * from public.calendar_info(%s, %s)'
+            df = self.convert_timestamps(pd.read_sql_query(query, cnxn, params=[month, year]), ['start_time'])
+        return df

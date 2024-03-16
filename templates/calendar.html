@@ -25,12 +25,25 @@
             </tr>
             {% for week in calendar %}
             <tr>
-                {% for day in week %}
+                {% for (day, activities) in week %}
                 <td>
                     <h3 class='day'>{{ day }}</h3>
-                    <div class='activity'>
-                        <h3 class='activ_text'> Running - Running Activity</h3>
-                        <h3 class='activ_text'> <span class="distance">3.23 miles</span> <span class="time">21 min 30 sec</span> </h3>                    </div>
+                    {% for activity in activities %}
+                        <a class = "activity_link" href="{{url_for('main.activity_route', activity_id=activity['activity_id'])}}">
+                            {% if activity['Sport'] == 'Running'%}
+                            <div class='activity_running'>
+                            {% elif activity['Sport'] == 'Cycling' %}
+                            <div class='activity_cycling'>
+                            {% elif activity['Sport'] == 'Rowing' %}
+                            <div class='activity_rowing'>
+                            {% else %}
+                            <div class='activity_other'>
+                            {% endif %}
+                                <h3 class='activ_text'> {{activity['DisplaySport']}} - {{ activity['ActivityTitle'] }} </h3>
+                                <h3 class='activ_text'> <span class="distance">{{ activity['Distance'] }} miles</span> <span class="time">{{ activity['Duration'] }}</span> </h3>                    
+                            </div>
+                        </a>
+                    {% endfor %}
                 </td>
                 {% endfor %}
             </tr>

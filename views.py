@@ -182,11 +182,15 @@ def activity(activity_id):
 
 def get_calendar():
     month = session.get('month', 0)
+    session['month'] = 0
     year = session.get('year', 0)
+    session['year'] = 0
     # print(f"Month: {month}, Year: {year}")
     today = pd.Timestamp.now()
     current_month = today.strftime('%B %Y')
     if year == 0 and month == 0:
+        month = today.month
+        year = today.year
         month_string = current_month
         print("NO MONTH OR YEAR")
     else:
@@ -205,11 +209,16 @@ def get_calendar():
     # Generate calendar data for current month
     cal = calendar.monthcalendar(year, month)
     cal = [['--' if day == 0 else day for day in week] for week in cal]
-    # activity_info = da.get_calendar_info(year, month)
-    # if len(activity_info) > 0:
-    #     activity_list = dt.prepare_calendar_info(activity_info, cal)
+    cal = [[(day, []) for day in week] for week in cal]
+    activity_info = da.get_calendar_info(year, month)
+    if len(activity_info) > 0:
+        cal = dt.prepare_calendar_info(activity_info, cal)
+    for week in cal:
+        for day in week:
+            print(type(day))
+            break
     
-    return render_template('calendar.html', calendar=cal, calendar_title=month_string, month=month, year=year, current_month=current_month)
+    return render_template('calendar.html', calendar=cal, calendar_title=month_string, month=month, year=year, current_month=current_month, sport='Other', zip=zip)
 
 def switch_month(year, month):
     session['month'] = month

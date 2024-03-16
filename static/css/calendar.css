@@ -32,17 +32,46 @@ td, th {
     font-family: comic sans ms, sans-serif;
     padding-left: 5px;
 }
-.activity {
-    border: 1.5px solid #0a9e4a;
+.activity_running, .activity_cycling, .activity_rowing, .activity_other {
     border-radius: 5px;
+}
+.activity_link {
+    text-decoration: none;
+    color: #000;
+}
+.activity_running {
+    border: 1.5px solid #0a9e4a;
     background-color:#7ed9a5;
-
+}
+.activity_cycling {
+    border: 1.5px solid #096683;
+    background-color:#72aec1;
+}
+.activity_rowing {
+    border: 1.5px solid #d46516;
+    background-color:#d3976d;
+}
+.activity_other {
+    border: 1.5px solid #d028a1;
+    background-color:#ba85ab;
 }
 .distance {
     margin-right: 4px; /* adjust as needed */
 }
-.activity:hover {
+.activity_running:hover, .activity_cycling:hover, .activity_rowing:hover, .activity_other:hover {
+    cursor: pointer;
+}
+.activity_running:hover {
     background-color: #4ab478;
+}
+.activity_cycling:hover {
+    background-color: #308aa8;
+}
+.activity_rowing:hover {
+    background-color: #bc7a48;
+}
+.activity_other:hover {
+    background-color: #a35791;
 }
 td {
     padding-left: 10px;
