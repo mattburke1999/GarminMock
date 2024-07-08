@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error</title>
+</head>
+<body>
+    <h1>Error</h1>
+    {% if (service_method) %}
+        <p> Service method: {{ service_method }}</p>
+    {% endif %}
+    {% if (prod_error) %}
+        <p> {{ prod_error }}</p>
+    {% endif %}
+    <p>{{ error_message }}</p>
+    <a href="/homePage">Return to the homepage</a>
+</html>

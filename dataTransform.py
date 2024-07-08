@@ -141,7 +141,7 @@ class DataTransform:
             capitalSport = sport.title()        
             activity_dict['Sport'] = capitalSport
             sub_sport = activity['sub_sport']
-            display_sport = sport if sport in ('running', 'cycling', 'rowing') and sub_sport == 'generic' else sub_sport
+            display_sport = sport if sport in ('running', 'cycling', 'rowing') and sub_sport in ('generic', None) else sub_sport
             display_sport = f'{display_sport.title()}'.replace('_', ' ')
             #capitalize all first letters of each word in display_sport
             display_sport_capital = display_sport.title()
@@ -228,7 +228,7 @@ class DataTransform:
         df['DateTime'] = df['start_time']
         df['Day'] = df['start_time'].apply(lambda x: int(x.strftime('%d')))
         df['Sport'] = df['sport'].apply(lambda x: x.title())
-        df['DisplaySport'] = df[['sport','sub_sport']].apply(lambda x: x['sport'] if x['sport'] in ('running', 'cycling', 'rowing') and x['sub_sport'] == 'generic' else x['sub_sport'], axis=1)
+        df['DisplaySport'] = df[['sport','sub_sport']].apply(lambda x: x['sport'] if x['sport'] in ('running', 'cycling', 'rowing') and x['sub_sport'] in ('generic', None) else x['sub_sport'], axis=1)
         df['DisplaySport'] = df['DisplaySport'].apply(lambda x: x.title().replace('_', ' '))
         df['DisplaySport'] = df['DisplaySport'].apply(lambda x: x.title())
         df['Duration'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))

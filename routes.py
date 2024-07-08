@@ -6,7 +6,6 @@ from views import show_register, register, login, check_login, home, homePage, s
 
 bp = Blueprint('main', __name__)
 
-
 def login_required(f):
     return check_login(f)
 
@@ -16,20 +15,29 @@ def show_register_route():
 
 @bp.route('/register', methods=['POST'])
 def register_route():
-    return register()
+    firstname = request.form['first-name']
+    lastname = request.form['last-name']
+    email = request.form['email']
+    username = request.form['username']
+    password = request.form['password']
+    return register(firstname, lastname, email, username, password)
 
 @bp.route('/login', methods=['POST'])
 def login_route():
-    return login()
+    username = request.form['username']
+    password = request.form['password']
+    return login(username, password)
 
 @bp.route('/login_form', methods=['GET'])
 def show_login_form_route():
-    return show_login_form()
+    login_error = request.args.get('show_error')
+    print(f'LOGIN ERROR: {login_error}')
+    return show_login_form(login_error)
 
 @bp.route('/')
 @login_required
 def home_route():
-    return homePage()
+    return home()
 
 @bp.route('/homePage', methods=['GET'])
 @login_required

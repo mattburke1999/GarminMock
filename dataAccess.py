@@ -1,16 +1,16 @@
 import psycopg2
 import bcrypt
 import json
-import os
 import pandas as pd
 import uuid
+from config import Config as environ
 
 class DataAccess:
     def __init__(self, redis_cnxn):
         self.redis_cnxn = redis_cnxn
 
     def connect_to_postgres(self):
-        db_params = json.loads(os.environ.get('PostgreSQL_desktop'))
+        db_params = json.loads(environ.PG_DESKTOP)
         cnxn = psycopg2.connect(**db_params)
         cnxn.autocommit = True
         return cnxn
