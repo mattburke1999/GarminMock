@@ -80,6 +80,7 @@ def prepare_lap_html_list(lap_df, activity_id_list, result_queue):
     return
 
 def prepare_record_html_list(record_info, activity_id_list, result_queue):
+    print(record_info)
     record_html_list = dt.prepare_record_info(record_info, activity_id_list)
     result_queue.put((record_html_list, 'record_html_list'))
     return
@@ -90,14 +91,16 @@ def single_date(date_str):
         print("NO ACTIVITY FOUND")
         return (False, 'No activity found')
     print("ACTIVITY FOUND")
-    activity_thread = Thread(target=prepare_activity_list, args=(session_df,None))
-    lap_thread = Thread(target=prepare_lap_html_list, args=(lap_df, list(set(session_df['activity_id'])), None))
-    record_thread = Thread(target=prepare_record_html_list, args=(record_info, list(set(session_df['activity_id'])), None))
+    activity_thread = Thread(target=prepare_activity_list, args=(session_df, None))
+    lap_thread = Thread(target=prepare_lap_html_list, args=(lap_df, session_df['activity_id'].to_list(), None))
+    record_thread = Thread(target=prepare_record_html_list, args=(record_info, session_df['activity_id'].to_list(), None))
     threads = [activity_thread, lap_thread, record_thread]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
+        
+    
  
     session['date_title'] = pd.to_datetime(date_str).strftime('%B %d %Y')
     return (True, None)
@@ -112,8 +115,8 @@ def month_detail(month, year):
     print("ACTIVITY FOUND")
     result_queue = Queue()
     activity_thread = Thread(target=prepare_activity_list, args=(session_df, result_queue))
-    lap_thread = Thread(target=prepare_lap_html_list, args=(lap_df, list(set(session_df['activity_id'])), result_queue))
-    record_thread = Thread(target=prepare_record_html_list, args=(record_df, list(set(session_df['activity_id'])), result_queue))
+    lap_thread = Thread(target=prepare_lap_html_list, args=(lap_df, session_df['activity_id'].to_list(), result_queue))
+    record_thread = Thread(target=prepare_record_html_list, args=(record_df, session_df['activity_id'].to_list(), result_queue))
     threads = [activity_thread, lap_thread, record_thread]
     for thread in threads:
         thread.start()
@@ -122,8 +125,6 @@ def month_detail(month, year):
         
     while not result_queue.empty():
         queue_item = result_queue.get()
-        if queue_item[1] == 'activity_list':
-            print(f'ACTIVITY LIST: {queue_item[0]}')
         session[queue_item[1]] = da.create_cookie(json.dumps(queue_item[0]))
         
     month_string = pd.to_datetime(f'{month}/01/{year}').strftime('%B %Y')
@@ -149,10 +150,8 @@ def get_multiple_activity_info():
             
         activity_infos = {}
         while not result_queue.empty():
-            print("GETTING RESULTS FROM QUEUE")
             queue_item = result_queue.get()
             activity_infos[queue_item[1]] = queue_item[0]
-        print(f'ACTIVITY INFOS: {activity_infos}')
         return (True, (activity_infos['activity_list'], activity_infos['lap_html_list'], activity_infos['record_html_list']))
     except Exception:
         return (False, traceback.format_exc())
@@ -174,7 +173,8 @@ def get_single_activity_info(activity_id):
     activity_info = {}
     while not result_queue.empty():
         queue_item = result_queue.get()
-        activity_info[queue_item[1]] = queue_item[0][0]
+        print(f'QUEUE ITEM: {queue_item}')
+        activity_info[queue_item[1]] = queue_item[0][0] if len(queue_item[0]) > 0 else None
     
     activity_dict = activity_info['activity_list']
     lap_html = activity_info['lap_html_list']

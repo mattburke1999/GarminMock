@@ -198,12 +198,14 @@ class DataTransform:
         map_htmls = []
         record_info = record_info[record_info['activity_id'].isin(activity_id_list)]
         record_info = record_info.sort_values('timestamp')
-        for activity_id in record_info['activity_id'].unique():
+        for activity_id in activity_id_list:
             activity_df = record_info[record_info['activity_id'] == activity_id]
             map_folium = self.build_map(activity_df)
             if map_folium:
+                print(f"MAP ACTIVITY ID: {activity_id}")
                 map_html = map_folium._repr_html_().replace('padding-bottom:60%;', 'padding-bottom:30%;')
             else:
+                print(f'ACTIVITY ID {activity_id}')
                 map_html = None
             map_htmls.append(map_html)
         return map_htmls
