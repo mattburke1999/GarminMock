@@ -64,14 +64,14 @@ def logout():
 def activity(activity_id):
     result = get_single_activity_info(activity_id)
     if not result[0]:
-        show_error_page(result[1], 'get_single_activity_info', 'Error getting activity information.')
+        return show_error_page(result[1], 'get_single_activity_info', 'Error getting activity information.')
     activity_dict, lap_html, folium_map = result[1]
     return render_template('singleActivity.html', activity=activity_dict, lap_html=lap_html, folium_map=folium_map)
 
 def get_calendar():
     result = get_calendar_info()
     if not result[0]:
-        show_error_page(result[1], 'get_calendar_info', 'Error getting calendar information.')
+        return show_error_page(result[1], 'get_calendar_info', 'Error getting calendar information.')
     cal, month_string, month, year, current_month = result[1]    
     return render_template('calendar.html', calendar=cal, calendar_title=month_string, month=month, year=year, current_month=current_month, sport='Other', zip=zip)
 
