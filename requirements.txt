@@ -1,4 +1,5 @@
 Flask
+Flask-Cors
 pyodbc
 pandas
 psycopg2-binary  # or just psycopg2 if you prefer
