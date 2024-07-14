@@ -9,12 +9,11 @@ class DataTransform:
         hours = int(seconds / 3600)
         minutes = int((seconds % 3600) / 60)
         seconds = seconds % 60
+        seconds = round(seconds, 3) if seconds > 9 else f"0{round(seconds,3)}"
         if hours == 0:
-            return f'{minutes} min {round(seconds,3)} sec'
-        elif hours == 1:
-            return f'{hours} hr {minutes} min {round(seconds,3)} sec'
+            return f'{minutes}:{seconds}'
         else:
-            return f'{hours} hrs {minutes} min {round(seconds,3)} sec'
+            return f'{hours}:{minutes if minutes > 9 else f"0{minutes}"}:{seconds}'
 
     def prepare_running(self, activity, activity_dict):
         distance = activity['total_distance']
@@ -59,49 +58,18 @@ class DataTransform:
         activity_dict['Elapsed Stroke Rate'] = float(round((total_cycles / (elapsed_time / 60)),2))
         return activity_dict
 
-    def lap_dfs_to_htmls(self, lap_df):
-        lap_html_list = []
-        for activity_id in lap_df['activity_id'].unique():
-            lap = lap_df[lap_df['activity_id'] == activity_id]
-            if len(lap) == 0:
-                lap_html_list.append(None)
-            else:
-                lap = lap.drop('activity_id', axis=1)
-                lap_html = lap.to_html(index=False).replace(' style="text-align: right;"','').replace(' border="1"','')
-                for col in lap.columns:
-                    lap_html = lap_html.replace(f'<th>{col}</th>', f'<th class="colTitle">{col}</th>')
-                lap_html_list.append(lap_html)
-        if len(lap_html_list) == 0:
-            return [None]
-        else:
-            return lap_html_list
-
-    def time_seconds_to_string_lap(self, seconds):
-        hours = int(seconds / 3600)
-        minutes = int((seconds % 3600) / 60)
-        seconds = seconds % 60
-        if hours == 0:
-            if seconds < 10:
-                return f'{minutes}:0{round(seconds,3)}'
-            return f'{minutes}:{round(seconds,3)}'
-        else:
-            if seconds < 10:
-                return f'{hours}:{minutes}:0{round(seconds,3)}'
-            return f'{hours}:{minutes}:{round(seconds,3)}'
-
     def prepare_lap_info(self, df, activity_id_list):
         # drop all rows where df['activity_id'] is not in activity_id_list
         df = df[df['activity_id'].isin(activity_id_list)]
-        
         cols = df.columns.tolist()
         df['lap'] = df['lap_num']
         df['distance'] = df['total_distance'].apply(lambda x: round(x/mile_dist, 2))
-        df['duration'] = df['total_time'].apply(lambda x: self.time_seconds_to_string_lap(x))
-        df['elapsed time'] = df['total_elapsed_time'].apply(lambda x: self.time_seconds_to_string_lap(x))
+        df['duration'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))
+        df['elapsed time'] = df['total_elapsed_time'].apply(lambda x: self.time_seconds_to_string(x))
         df['avg_speed'] = df['avg_speed'].apply(lambda x: round(mile_dist/(60*x), 2) if x > 0 else 0)
         df['pace_calc'] = df.apply(lambda row: row['total_time'] / (row['total_distance'] / mile_dist) if row['total_distance'] != 0 else 0, axis=1)    # set df['pace'] = df['avg_speed'] if avg_speed > 0 else pace_calc
         df['pace'] = df.apply(lambda row: row['avg_speed'] if row['avg_speed'] > 0 else row['pace_calc'], axis=1)
-        df['pace'] = df['pace'].apply(lambda x: self.time_seconds_to_string_lap(x))
+        df['pace'] = df['pace'].apply(lambda x: self.time_seconds_to_string(x))
         df['max_speed'] = df['max_speed'].apply(lambda x: round(mile_dist/(60*x), 2) if x > 0 else 0)
         df['best pace'] = df['max_speed'].apply(lambda x: x if x > 0 else 0)
         df['avg hr'] = df['avg_hr']
@@ -117,8 +85,14 @@ class DataTransform:
         cols.remove('activity_id')
         df = df.sort_values(by=['start_time', 'lap'])
         df = df.drop(cols, axis=1)
-        html_list = self.lap_dfs_to_htmls(df)
-        return html_list
+        lap_list = []
+        for activity_id in activity_id_list:
+            lap_df = df[df['activity_id'] == activity_id]
+            lap_list.append(lap_df.to_dict('records'))
+        # html_list = self.lap_dfs_to_htmls(df)
+        # print(list(df.columns))
+        # return html_list
+        return lap_list
 
     def prepare_multiple_activities(self, df):
         activity_list = []
