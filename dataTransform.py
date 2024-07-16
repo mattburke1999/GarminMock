@@ -15,49 +15,31 @@ class DataTransform:
         else:
             return f'{hours}:{minutes if minutes > 9 else f"0{minutes}"}:{seconds}'
 
-    def prepare_running(self, activity, activity_dict):
-        distance = activity['total_distance']
-        activity_dict['Distance'] = float(round(distance/mile_dist, 3))
-        pace = activity['total_time'] / (distance/mile_dist)
-        activity_dict['Pace'] = self.time_seconds_to_string(pace)
-        elapsed_pace = activity['total_elapsed_time'] / (distance/mile_dist)
-        activity_dict['Elapsed Pace'] = self.time_seconds_to_string(elapsed_pace)
-        activity_dict['Avg Cadence'] = int(activity['avg_running_cadence'])
-        activity_dict['Max Cadence'] = int(activity['max_running_cadence'])
-        activity_dict['Steps'] = int(activity['total_strides'])
-        stride_length = activity['total_distance'] / activity['total_strides']
-        activity_dict['Avg Stride Length'] = round(stride_length, 2)
-        return activity_dict
+    def prepare_running(self, df):
+        df['Distance'] = df['total_distance'].apply(lambda x: float(round(x/mile_dist, 3)))
+        df['Pace'] = df.apply(lambda row: self.time_seconds_to_string(row['total_time'] / (row['total_distance'] / mile_dist)), axis=1)
+        df['Elapsed Pace'] = df.apply(lambda row: self.time_seconds_to_string(row['total_elapsed_time'] / (row['total_distance'] / mile_dist)), axis=1)
+        df['Avg Cadence'] = df['avg_running_cadence'].apply(lambda x: int(x))
+        df['Max Cadence'] = df['max_running_cadence'].apply(lambda x: int(x))
+        df['Steps'] = df['total_strides'].apply(lambda x: int(x))
+        df['Avg Stride Length'] = df.apply(lambda row: round(row['total_distance'] / row['total_strides'], 2), axis=1)
+        return df
+        
+    def prepare_cycling(self, df):
+        df['Distance'] = df['total_distance'].apply(lambda x: float(round(x/mile_dist, 3)))
+        df['Speed'] = df.apply(lambda row: float(round((row['total_distance'] / mile_dist) / (row['total_time'] / 3600), 2)), axis=1)
+        df['Elapsed Speed'] = df.apply(lambda row: float(round((row['total_distance'] / mile_dist) / (row['total_elapsed_time'] / 3600), 2)), axis=1)
+        return df
 
-    def prepare_cycling(self, activity, activity_dict):
-        distance = activity['total_distance']
-        activity_dict['Distance'] = float(round(distance/mile_dist, 3))
-        total_time = activity['total_time']
-        total_elapsed_time = activity['total_elapsed_time']
-        speed = (distance / mile_dist) / (total_time / 3600)
-        elapsed_speed = (distance / mile_dist) / (total_elapsed_time / 3600)
-        activity_dict['Speed'] = float(round(speed, 2))
-        activity_dict['Elapsed Speed'] = float(round(elapsed_speed, 2))
-        return activity_dict
-
-    def prepare_rowing(self, activity, activity_dict):
-        activity_dict['Distance'] = float(activity['total_distance'])
-        #calculate pace min:sec/500m
-        total_time = activity['total_time']
-        elapsed_time = activity['total_elapsed_time']
-        distance = activity['total_distance']
-        pace = (total_time) / (distance / 500) if distance != 0 else 0
-        elapsed_pace = (elapsed_time) / (distance / 500) if distance != 0 else 0
-        activity_dict['Pace'] = self.time_seconds_to_string(pace)
-        activity_dict['Elapsed Pace'] = self.time_seconds_to_string(elapsed_pace)
-        total_cycles = activity['total_cycles']
-        activity_dict['Total Strokes'] = int(total_cycles)
-        total_time = activity['total_time']
-        activity_dict['Stroke Rate'] = float(round((total_cycles / (total_time / 60)),2))
-        elapsed_time = activity['total_elapsed_time']
-        activity_dict['Elapsed Stroke Rate'] = float(round((total_cycles / (elapsed_time / 60)),2))
-        return activity_dict
-
+    def prepare_rowing(self, df):
+        df['Distance'] = df['total_distance'].apply(lambda x: float(x))
+        df['Pace'] = df.apply(lambda row: self.time_seconds_to_string(row['total_time'] / (row['total_distance'] / 500) if row['total_distance']!=0 else 0), axis=1)
+        df['Elapsed Pace'] = df.apply(lambda row: self.time_seconds_to_string(row['total_elapsed_time'] / (row['total_distance'] / 500) if row['total_distance']!=0 else 0), axis=1)
+        df['Total Strokes'] = df['total_cycles'].apply(lambda x: int(x))
+        df['Stroke Rate'] = df.apply(lambda row: float(round((row['total_cycles'] / (row['total_time'] / 60)),2)), axis=1)
+        df['Elapsed Stroke Rate'] = df.apply(lambda row: float(round((row['total_cycles'] / (row['total_elapsed_time'] / 60)),2)), axis=1)
+        return df
+        
     def prepare_lap_info(self, df, activity_id_list):
         # drop all rows where df['activity_id'] is not in activity_id_list
         df = df[df['activity_id'].isin(activity_id_list)]
@@ -93,55 +75,40 @@ class DataTransform:
         # print(list(df.columns))
         # return html_list
         return lap_list
+    
+    def set_display_sport(self, sport, sub_sport):
+        display_sport = sport if sport in ('running', 'cycling', 'rowing') and sub_sport in ('generic', None) else sub_sport
+        display_sport = display_sport.replace('_', ' ').title()
+        return display_sport
 
     def prepare_multiple_activities(self, df):
-        activity_list = []
+        cols_to_remove = list(df.columns)
+        df['Activity Title'] = df['activity_title'].apply(lambda x: x.title())
+        df['Description'] = df['description']
+        df['Date'] = df['start_time'].apply(lambda x: x.strftime('%A, %B %d %I:%M %p').replace(" 0", " "))
+        df['Sport'] = df['sport'].apply(lambda x: x.title())
+        df['DisplaySport'] = df.apply(lambda x: self.set_display_sport(x['sport'], x['sub_sport']), axis=1)
+        df['Duration'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))
+        df['Elapsed Time'] = df['total_elapsed_time'].apply(lambda x: self.time_seconds_to_string(x))
+        df['Avg HR'] = df['avg_hr'].apply(lambda x: int(x))
+        df['Max HR'] = df['max_hr'].apply(lambda x: int(x))
+        df['Recovery HR'] = df['recovery_hr'].apply(lambda x: int(x))
+        df['Resting Calories'] = df['resting_calories'].apply(lambda x: int(x))
+        df['Total Calories'] = df['total_calories'].apply(lambda x: int(x))
+        df['Active Calories'] = df.apply(lambda row: int(row['total_calories'] - row['resting_calories']), axis=1)
+        df['Sweat Loss'] = df['sweat_loss'].apply(lambda x: int(x))
+        df['Total Descent'] = df['total_descent'].apply(lambda x: round(float(x * 3.28084), 3))
+        df['Total Ascent'] = df['total_ascent'].apply(lambda x: round(float(x * 3.28084), 3))
+        running_df = self.prepare_running(df[df['sport'] == 'running'])
+        cycling_df = self.prepare_cycling(df[df['sport'] == 'cycling'])
+        rowing_df = self.prepare_rowing(df[df['sport'] == 'rowing'])
+        other_df = df[~df['sport'].isin(['running', 'cycling', 'rowing'])]
+        df = pd.concat([running_df, cycling_df, rowing_df, other_df])
         df = df.sort_values(by=['start_time'])
-        for i in range(len(df)):
-            activity_dict = {}
-            activity = df.iloc[i]
-            activity_dict['Activity Title'] = activity['activity_title'].title()
-            activity_dict['Description'] = activity['description']
-            activity_dict['activity_id'] = activity['activity_id']
-            start_time = activity['start_time']
-            date_part = start_time.strftime('%A, %B %d')
-            time_part = start_time.strftime('%I:%M %p')
-            activity_dict['date_edit'] = start_time.strftime('%Y-%m-%d')
-            activity_dict['time_edit'] = start_time.strftime('%H:%M')
-            if time_part[0] == '0':
-                time_part = time_part[1:]
-            activity_dict['Date'] = f'{date_part} @ {time_part}'
-            sport = activity['sport']
-            capitalSport = sport.title()        
-            activity_dict['Sport'] = capitalSport
-            sub_sport = activity['sub_sport']
-            display_sport = sport if sport in ('running', 'cycling', 'rowing') and sub_sport in ('generic', None) else sub_sport
-            display_sport = f'{display_sport.title()}'.replace('_', ' ')
-            #capitalize all first letters of each word in display_sport
-            display_sport_capital = display_sport.title()
-            activity_dict['DisplaySport'] = display_sport_capital
-            total_time = self.time_seconds_to_string(activity['total_time'])
-            activity_dict['Duration'] = total_time
-            elapsed_time = self.time_seconds_to_string(activity['total_elapsed_time'])
-            activity_dict['Elapsed Time'] = elapsed_time
-            activity_dict['Avg HR'] = int(activity['avg_hr'])
-            activity_dict['Max HR'] = int(activity['max_hr'])
-            activity_dict['Recovery HR'] = int(activity['recovery_hr'])
-            activity_dict['Resting Calories'] = int(activity['resting_calories'])
-            activity_dict['Total Calories'] = int(activity['total_calories'])
-            activity_dict['Active Calories'] = int(activity['total_calories'] - activity['resting_calories'])
-            activity_dict['Sweat Loss'] = int(activity['sweat_loss'])
-            total_descent = activity['total_descent']
-            activity_dict['Total Descent'] = round(float(total_descent * 3.28084), 3)
-            total_ascent = activity['total_ascent']
-            activity_dict['Total Ascent'] = round(float(total_ascent * 3.28084), 3)
-            if sport == 'running':
-                activity_dict = self.prepare_running(activity, activity_dict)
-            elif sport == 'cycling':
-                activity_dict = self.prepare_cycling(activity, activity_dict)
-            elif sport == 'rowing':
-                activity_dict = self.prepare_rowing(activity, activity_dict)
-            activity_list.append(activity_dict)
+        cols_to_remove.remove('activity_id')
+        df = df.drop(cols_to_remove, axis=1)
+        # convert to list of dictionaries
+        activity_list = df.to_dict('records')
         return activity_list
     
     def build_map(self, record_info):

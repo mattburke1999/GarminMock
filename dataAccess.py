@@ -6,8 +6,8 @@ import uuid
 from config import Config as environ
 
 class DataAccess:
-    def __init__(self, redis_cnxn):
-        self.redis_cnxn = redis_cnxn
+    def __init__(self, redis_cnxn=None):
+        self.redis_cnxn = redis_cnxn if redis_cnxn else None
 
     def connect_to_postgres(self):
         db_params = json.loads(environ.PG_DESKTOP)

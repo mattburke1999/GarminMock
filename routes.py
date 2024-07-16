@@ -1,15 +1,10 @@
 from flask import Blueprint, request, render_template
-from views import register, login, check_login, searchByDate, multiple_activity, searchByMonth,\
-    logout, activity, get_calendar, switch_month
+from views import register, login, check_login, searchByDate, searchByMonth, logout, activity, get_calendar, switch_month
 
 bp = Blueprint('main', __name__)
 
 def login_required(f):
     return check_login(f)
-
-# @bp.route('/registrationPage')
-# def show_register_route():
-#     return show_register()
 
 @bp.route('/register', methods=['POST'])
 def register_route():
@@ -27,28 +22,9 @@ def login_route():
     password = data['password']
     return login(username, password)
 
-# @bp.route('/login_form', methods=['GET'])
-# def show_login_form_route():
-#     login_error = request.args.get('show_error')
-#     print(f'LOGIN ERROR: {login_error}')
-#     return show_login_form(login_error)
-
 @bp.route('/')
 def home_route():
     return render_template('login.html')
-# @login_required
-# def home_route():
-#     return home()
-
-# @bp.route('/homePage', methods=['GET'])
-# @login_required
-# def homePage_route():
-#     return homePage()
-
-# @bp.route('/searchByDate', methods=['GET'])
-# @login_required
-# def show_searchByDate_form_route():
-#     return show_searchByDate_form()
 
 @bp.route('/ByDate', methods=['GET'])
 @login_required
@@ -56,33 +32,12 @@ def searchByDate_route():
     date = request.args.get('date')
     return searchByDate(date)
 
-@bp.route('/multiple_activity')
-@login_required
-def multiple_activity_route():
-    return multiple_activity()
-
-# @bp.route('/searchByMonth', methods=['GET'])
-# @login_required
-# def show_searchByMonth_form_route():
-#     return show_searchByMonth_form()
-
 @bp.route('/ByMonth', methods=['GET'])
 @login_required
 def searchByMonth_route():
-    # data = request.get_json()
     month = request.args.get('month')
     year = request.args.get('year')
     return searchByMonth(month, year)
-
-# @bp.route('/searchByYear_form', methods=['GET'])
-# @login_required
-# def show_searchByYear_form_route():
-#     return show_searchByYear_form()
-
-# @bp.route('/default', methods=['GET'])
-# @login_required
-# def default_route():
-#     return default()
 
 @bp.route('/logout', methods=['GET'])
 def logout_route():
