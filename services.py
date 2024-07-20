@@ -69,36 +69,11 @@ def login_process(username, password):
         session['logged_in'] = False
         return (False, 'Invalid username or password')
         
-def prepare_activity_list(session_df, result_queue):
-    activity_list = dt.prepare_multiple_activities(session_df)
-    result_queue.put((activity_list, 'activity_list'))
-    return
-
-def prepare_lap_list(lap_df, activity_id_list, result_queue):
-    lap_list = dt.prepare_lap_info(lap_df, activity_id_list)
-    result_queue.put((lap_list, 'lap_list'))
-    return
-
-def prepare_record_html_list(record_info, activity_id_list, result_queue):
-    record_html_list = dt.prepare_record_info(record_info, activity_id_list)
-    result_queue.put((record_html_list, 'record_html_list'))
-    return
-
 def prepare_all_info(session_df, lap_df, record_info):
-    result_queue = Queue()
-    activity_thread = Thread(target=prepare_activity_list, args=(session_df, result_queue))
-    lap_thread = Thread(target=prepare_lap_list, args=(lap_df, session_df['activity_id'].to_list(), result_queue))
-    record_thread = Thread(target=prepare_record_html_list, args=(record_info, session_df['activity_id'].to_list(), result_queue))
-    threads = [activity_thread, lap_thread, record_thread]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
-    
     return_dict = {}
-    while not result_queue.empty():
-        queue_item = result_queue.get()
-        return_dict[queue_item[1]] = queue_item[0]
+    return_dict['activity_list'] = dt.prepare_multiple_activities(session_df)
+    return_dict['lap_list'] = dt.prepare_lap_info(lap_df, return_dict['activity_list'])
+    return_dict['record_html_list'] = dt.prepare_record_info(record_info, return_dict['activity_list'])
     return return_dict
     
 def single_date(date_str):

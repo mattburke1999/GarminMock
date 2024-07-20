@@ -107,6 +107,7 @@ class DataTransform:
         df = df.sort_values(by=['start_time'])
         cols_to_remove.remove('activity_id')
         df = df.drop(cols_to_remove, axis=1)
+        df = df.fillna('--')
         # convert to list of dictionaries
         activity_list = df.to_dict('records')
         return activity_list
