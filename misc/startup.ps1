@@ -11,9 +11,9 @@ if (-not (Test-Path -Path env\flask_env)) {
     # go back to the root directory
     Set-Location ..
 }
+Write-Host "Installing requirements"
+# install requirements
+. .\env\flask_env\Scripts\pip install -r requirements.txt
 
-# activate the virtual environment
+# activate virtual environment
 . .\env\flask_env\Scripts\activate
-Write-Host "Virtual environment has been activated...installing requirements"
-# install requirements.txt
-pip install -r requirements.txt

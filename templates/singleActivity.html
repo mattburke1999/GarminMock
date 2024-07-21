@@ -28,39 +28,39 @@
     <div class='containerSingle'>
         <div class='header2'>
             <div class='topHeader'>
-                {% if activity['Sport'] == 'Running' %}
+                {% if activity['sport'] == 'Running' %}
                     <img src="/static/images/running-icon.jpg" alt="Running icon">
-                {% elif activity['Sport'] == 'Cycling' %}
+                {% elif activity['sport'] == 'Cycling' %}
                     <img src="/static/images/cycling-icon.png" alt="Running icon">
-                {% elif activity['Sport'] == 'Rowing' %}
+                {% elif activity['sport'] == 'Rowing' %}
                     <img src="/static/images/rowing-icon.jpg" alt="Running icon">
                 {% endif %}
                 <div>
-                    <h1><span class="date-name">{{activity.Date}}</span></h1>
-                    <h1><span class="sport-name">{{activity.DisplaySport}}</span></h1>
+                    <h1><span class="date-name">{{activity['display_date']}}</span></h1>
+                    <h1><span class="sport-name">{{activity['display_sport']}}</span></h1>
                 </div>
             </div>
-            <h1><span class="titleName">{{activity['Activity Title']}}</span></h1>
-            <h3><span class = 'name'>Description:</span> <span class = 'value'>{{activity['Description']}}</span></h3>
+            <h1><span class="titleName">{{activity['activity_title']}}</span></h1>
+            <h3><span class = 'name'>Description:</span> <span class = 'value'>{{activity['description']}}</span></h3>
         </div>
         <div class='times2'>
             <div class='grid-container2'>
-                <h2><span class="name">Duration:</span> <span class="value">{{activity['Duration']}}</span></h2>
-                <h2><span class="name">Elapsed Time:</span> <span class="value">{{activity['Elapsed Time']}}</span></h2>
-                {% if activity['Sport'] == 'Running'%}                
-                    <h2><span class="name">Avg Pace:</span> <span class="value">{{activity['Pace']}} /mi</span></h2>
-                    <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} /mi</span></h2>
-                {% elif activity['Sport'] == 'Cycling'%}
-                    <h2><span class="name">Avg Speed:</span> <span class="value">{{activity['Speed']}} mph</span></h2>
-                    <h2><span class="name">Elapsed Speed:</span> <span class="value">{{activity['Elapsed Speed']}} mph</span></h2>
-                {% elif activity['Sport'] == 'Rowing'%}
-                    <h2><span class="name">Pace:</span> <span class="value">{{activity['Pace']}} /500m</span></h2>
-                    <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['Elapsed Pace']}} /500m</span></h2>
+                <h2><span class="name">Duration:</span> <span class="value">{{activity['total_time']}}</span></h2>
+                <h2><span class="name">Elapsed Time:</span> <span class="value">{{activity['total_elapsed_time']}}</span></h2>
+                {% if activity['sport'] == 'Running'%}                
+                    <h2><span class="name">Avg Pace:</span> <span class="value">{{activity['pace']}} /mi</span></h2>
+                    <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['elapsed_pace']}} /mi</span></h2>
+                {% elif activity['sport'] == 'Cycling'%}
+                    <h2><span class="name">Avg Speed:</span> <span class="value">{{activity['pace']}} mph</span></h2>
+                    <h2><span class="name">Elapsed Speed:</span> <span class="value">{{activity['elapsed_pace']}} mph</span></h2>
+                {% elif activity['sport'] == 'Rowing'%}
+                    <h2><span class="name">Pace:</span> <span class="value">{{activity['pace']}} /500m</span></h2>
+                    <h2><span class="name">Elapsed Pace:</span> <span class="value">{{activity['elapsed_pace']}} /500m</span></h2>
                 {% endif %}
-                {% if activity['Sport'] in ('Running', 'Cycling')%}
-                    <h2><span class="name">Distance:</span> <span class="value">{{activity['Distance']}} miles</span></h2>
-                {% elif activity['Sport'] == 'Rowing' %}
-                    <h2><span class="name">Distance:</span> <span class="value">{{activity['Distance']}} m</span></h2>
+                {% if activity['sport'] in ('Running', 'Cycling')%}
+                    <h2><span class="name">Distance:</span> <span class="value">{{activity['total_distance']}} miles</span></h2>
+                {% elif activity['sport'] == 'Rowing' %}
+                    <h2><span class="name">Distance:</span> <span class="value">{{activity['total_distance']}} m</span></h2>
                 {% endif %}
             </div>
         </div>
@@ -84,37 +84,37 @@
         <div class="grid-container2">
             <div class='hr2'>
                 <h2><span class="container-title">Heart Rate:</span></h2>
-                <h2><span class="name">Avg HR:</span> <span class="value">{{activity['Avg HR']}} bpm</span></h2>
-                <h2><span class="name">Max HR:</span> <span class="value">{{activity['Max HR']}} bpm</span></h2>
-                <h2><span class="name">Recovery HR:</span> <span class="value">{{activity['Recovery HR']}} bpm</span></h2>
+                <h2><span class="name">Avg HR:</span> <span class="value">{{activity['avg_hr']}} bpm</span></h2>
+                <h2><span class="name">Max HR:</span> <span class="value">{{activity['max_hr']}} bpm</span></h2>
+                <h2><span class="name">Recovery HR:</span> <span class="value">{{activity['recovery_hr']}} bpm</span></h2>
             </div>
-            {% if activity['Sport'] == 'Running' %}
+            {% if activity['sport'] == 'Running' %}
                 <div class='steps2'>
                     <h2><span class="container-title">Steps:</span></h2>
-                    <h2><span class="name">Avg Cadence:</span> <span class="value">{{activity['Avg Cadence']}} spm</span></h2>
-                    <h2><span class="name">Max Cadence:</span> <span class="value">{{activity['Max Cadence']}} spm</span></h2>
-                    <h2><span class="name">Number of Steps:</span> <span class="value">{{activity['Steps']}}</span></h2>
-                    <h2><span class="name">Avg Stride Length:</span> <span class="value">{{activity['Avg Stride Length']}} m</span></h2>
+                    <h2><span class="name">Avg Cadence:</span> <span class="value">{{activity['avg_running_cadence']}} spm</span></h2>
+                    <h2><span class="name">Max Cadence:</span> <span class="value">{{activity['max_running_cadence']}} spm</span></h2>
+                    <h2><span class="name">Number of Steps:</span> <span class="value">{{activity['total_strides']}}</span></h2>
+                    <h2><span class="name">Avg Stride Length:</span> <span class="value">{{activity['avg_stride_length']}} m</span></h2>
                 </div>
-            {% elif activity['Sport'] == 'Rowing' %}
+            {% elif activity['sport'] == 'Rowing' %}
                 <div class='strokes2'>
                     <h2><span class="container-title">Strokes:</span></h2>
-                    <h2><span class="name">Stroke Rate:</span> <span class="value">{{activity['Stroke Rate']}} spm</span></h2>
-                    <h2><span class="name">Elapsed Stroke Rate:</span> <span class="value">{{activity['Elapsed Stroke Rate']}} spm</span></h2>
-                    <h2><span class="name">Number of Strokes:</span> <span class="value">{{activity['Total Strokes']}}</span></h2>
+                    <h2><span class="name">Stroke Rate:</span> <span class="value">{{activity['stroke_rate']}} spm</span></h2>
+                    <h2><span class="name">Elapsed Stroke Rate:</span> <span class="value">{{activity['elapsed_stroke_rate']}} spm</span></h2>
+                    <h2><span class="name">Number of Strokes:</span> <span class="value">{{activity['total_cycles']}}</span></h2>
                 </div>
             {% endif %}
             <div class='calories2'>
                 <h2><span class="container-title">Nutrition:</span></h2>
-                <h2><span class="name">Resting Calories:</span> <span class="value">{{activity['Resting Calories']}} cal</span></h2>
-                <h2><span class="name">Active Calories:</span> <span class="value">{{activity['Active Calories']}} cal</span></h2>
-                <h2><span class="name">Total Calories:</span> <span class="value">{{activity['Total Calories']}} cal</span></h2>
-                <h2><span class="name">Sweat Loss:</span> <span class="value">{{activity['Sweat Loss']}} ml</span></h2>
+                <h2><span class="name">Resting Calories:</span> <span class="value">{{activity['resting_calories']}} cal</span></h2>
+                <h2><span class="name">Active Calories:</span> <span class="value">{{activity['active_calories']}} cal</span></h2>
+                <h2><span class="name">Total Calories:</span> <span class="value">{{activity['total_calories']}} cal</span></h2>
+                <h2><span class="name">Sweat Loss:</span> <span class="value">{{activity['sweat_loss']}} ml</span></h2>
             </div>
             <div class='elevation2'>
                 <h2><span class="container-title">Elevation:</span></h2>
-                <h2><span class="name">Total Ascent:</span> <span class="value">{{activity['Total Ascent']}} ft</span></h2>
-                <h2><span class="name">Total Descent:</span> <span class="value">{{activity['Total Descent']}} ft</span></h2>
+                <h2><span class="name">Total Ascent:</span> <span class="value">{{activity['total_ascent']}} ft</span></h2>
+                <h2><span class="name">Total Descent:</span> <span class="value">{{activity['total_descent']}} ft</span></h2>
             </div>
         </div>
     </div>

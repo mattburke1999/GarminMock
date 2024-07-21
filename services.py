@@ -80,7 +80,6 @@ def prepare_lap_html_list(lap_df, activity_id_list, result_queue):
     return
 
 def prepare_record_html_list(record_info, activity_id_list, result_queue):
-    print(record_info)
     record_html_list = dt.prepare_record_info(record_info, activity_id_list)
     result_queue.put((record_html_list, 'record_html_list'))
     return
@@ -173,7 +172,6 @@ def get_single_activity_info(activity_id):
     activity_info = {}
     while not result_queue.empty():
         queue_item = result_queue.get()
-        print(f'QUEUE ITEM: {queue_item}')
         activity_info[queue_item[1]] = queue_item[0][0] if len(queue_item[0]) > 0 else None
     
     activity_dict = activity_info['activity_list']
