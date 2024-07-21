@@ -88,11 +88,11 @@ class DataAccess:
 
                 session_curs, lap_curs, record_curs = cursor.fetchone()
 
-                session_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{session_curs}"', cnxn), ['start_time', 'timestamp'])
-                lap_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{lap_curs}"', cnxn), ['start_time', 'timestamp'])
-                record_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{record_curs}"', cnxn), ['timestamp'])
+                session_info = pd.read_sql_query(f'FETCH ALL IN "{session_curs}"', cnxn)
+                lap_info = pd.read_sql_query(f'FETCH ALL IN "{lap_curs}"', cnxn)
+                # record_info = pd.read_sql_query(f'FETCH ALL IN "{record_curs}"', cnxn)
 
-        return session_info, lap_info, record_info
+        return session_info, lap_info #, record_info
 
     def get_activity_info_by_date_range(self, start_date, end_date):
         with self.connect_to_postgres() as cnxn:
@@ -103,11 +103,11 @@ class DataAccess:
 
                 session_curs, lap_curs, record_curs = cursor.fetchone()
 
-                session_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{session_curs}"', cnxn), ['start_time', 'timestamp'])
-                lap_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{lap_curs}"', cnxn), ['start_time', 'timestamp'])
-                record_info = self.convert_timestamps(pd.read_sql_query(f'FETCH ALL IN "{record_curs}"', cnxn), ['timestamp'])
+                session_info = pd.read_sql_query(f'FETCH ALL IN "{session_curs}"', cnxn)
+                lap_info = pd.read_sql_query(f'FETCH ALL IN "{lap_curs}"', cnxn)
+                # record_info = pd.read_sql_query(f'FETCH ALL IN "{record_curs}"', cnxn)
 
-        return session_info, lap_info, record_info
+        return session_info, lap_info #, record_info
     
     def updateTitle(self, new_title, new_description, new_timestamp, activity_id):
         #check to see what is getting passed as new title, new description, new timestamp

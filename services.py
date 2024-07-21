@@ -9,6 +9,7 @@ import redis
 from queue import Queue
 import json
 import pandas as pd
+from numpy import array_split
 import traceback
 
 calendar.setfirstweekday(calendar.SUNDAY)
@@ -69,34 +70,115 @@ def login_process(username, password):
         session['logged_in'] = False
         return (False, 'Invalid username or password')
         
-def prepare_all_info(session_df, lap_df, record_info):
+def prepare_activity_list(session_df, result_queue):
+    activity_list = dt.prepare_multiple_activities(session_df)
+    result_queue.put((activity_list, 'activity_list'))
+    return    
+
+def get_activity_info(session_df):
+    result_queue = Queue()
+    num_threads = 5
+    threads = []
+    session_df_splits = array_split(session_df, num_threads)
+    for i in range(num_threads):
+        thread = Thread(target=prepare_activity_list, args=(session_df_splits[i], result_queue))
+        threads.append(thread)
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    results = []
+    while not result_queue.empty():
+        queue_item = result_queue.get()
+        results += queue_item[0]
+    return results
+
+def prepare_lap_list(lap_df, activity_id_list, result_queue):
+    lap_list = dt.prepare_lap_info(lap_df, activity_id_list)
+    result_queue.put((lap_list, 'lap_list'))
+    return
+
+def get_lap_list(lap_df, activity_id_list):
+    result_queue = Queue()
+    num_threads = 10
+    threads = []
+    lap_df_splits = array_split(lap_df, num_threads)
+    activity_id_list_splits = array_split(activity_id_list, num_threads)
+    for i in range(num_threads):
+        thread = Thread(target=prepare_lap_list, args=(lap_df_splits[i], activity_id_list_splits[i], result_queue))
+        threads.append(thread)
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    results = []
+    while not result_queue.empty():
+        queue_item = result_queue.get()
+        results += queue_item[0]
+    return results
+
+def prepare_record_html_list(record_info, activity_id_list, result_queue):
+    record_html_list = dt.prepare_record_info(record_info, activity_id_list)
+    result_queue.put((record_html_list, 'record_html_list'))
+    return
+
+def prepare_record_html_list_threads(record_info, activity_id_list):
+    result_queue = Queue()
+    num_threads = 10
+    threads = []
+    record_info_splits = array_split(record_info, num_threads)
+    activity_id_list_splits = array_split(activity_id_list, num_threads)
+    for i in range(num_threads):
+        thread = Thread(target=prepare_record_html_list, args=(record_info_splits[i], activity_id_list_splits[i], result_queue))
+        threads.append(thread)
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    results = []
+    while not result_queue.empty():
+        queue_item = result_queue.get()
+        results += queue_item[0]
+    return results
+        
+def prepare_all_info_threads(session_df, lap_df):
+    result_queue = Queue()
+    activity_thread = Thread(target=prepare_activity_list, args=(session_df, result_queue))
+    lap_thread = Thread(target=prepare_lap_list, args=(lap_df, session_df['activity_id'].to_list(), result_queue))
+    # record_thread = Thread(target=prepare_record_html_list, args=(record_info, session_df['activity_id'].to_list(), result_queue))
+    threads = [activity_thread, lap_thread]
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
     return_dict = {}
-    return_dict['activity_list'] = dt.prepare_multiple_activities(session_df)
-    return_dict['lap_list'] = dt.prepare_lap_info(lap_df, return_dict['activity_list'])
-    return_dict['record_html_list'] = dt.prepare_record_info(record_info, return_dict['activity_list'])
+    while not result_queue.empty():
+        queue_item = result_queue.get()
+        return_dict[queue_item[1]] = queue_item[0]
+    # return_dict['record_html_list'] = dt.prepare_record_info(record_info, session_df['activity_id'].to_list())
     return return_dict
     
 def single_date(date_str):
-    session_df, lap_df, record_info = da.get_activity_info_by_date(pd.to_datetime(date_str).date())
+    session_df, lap_df = da.get_activity_info_by_date(pd.to_datetime(date_str).date())
     if len(session_df) == 0:
         print("NO ACTIVITY FOUND")
         return (False, 'No activities found')
     print("ACTIVITY FOUND")
     date_title = pd.to_datetime(date_str).strftime('%B %d %Y')
-    all_info = prepare_all_info(session_df, lap_df, record_info)
+    all_info = prepare_all_info_threads(session_df, lap_df)
     all_info['date_title'] = date_title
     return (True, all_info)
 
 def month_detail(month, year):
     start_date = pd.Timestamp(f'{year}-{month}-01')
     end_date = pd.Timestamp(f'{year}-{month}-01') + pd.offsets.MonthEnd(0)
-    session_df, lap_df, record_df = da.get_activity_info_by_date_range(start_date.date(), end_date.date())
+    session_df, lap_df = da.get_activity_info_by_date_range(start_date.date(), end_date.date())
     if len(session_df)==0:
         print("NO ACTIVITY FOUND")
         return (False, 'No activities found')
     print("ACTIVITY FOUND")
     month_string = pd.to_datetime(f'{month}/01/{year}').strftime('%B %Y')    
-    all_info = prepare_all_info(session_df, lap_df, record_df)
+    all_info = prepare_all_info_threads(session_df, lap_df)
     all_info['date_title'] = month_string
     return (True, all_info)
     
@@ -104,7 +186,7 @@ def get_single_activity_info(activity_id):
     session_info, lap_info, record_info = da.get_activity_by_id(activity_id)
     if len(session_info) == 0:
         return (False, 'No activity found')
-    all_info = prepare_all_info(session_info, lap_info, record_info)
+    all_info = prepare_all_info_threads(session_info, lap_info, record_info)
     return (True, all_info)
 
 def get_month_dates(month, year):
