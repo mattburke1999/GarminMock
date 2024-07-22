@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 from views import show_register, register, login, check_login, home, homePage, show_login_form,\
-    show_searchByDate_form, searchByDate, multiple_activity, show_searchByMonth_form, searchByMonth,\
+    show_searchByDate_form, searchByDate, show_searchByMonth_form, searchByMonth,\
     show_searchByYear_form, default, logout, activity, get_calendar, switch_month
 
 
@@ -54,11 +54,6 @@ def show_searchByDate_form_route():
 def searchByDate_route():
     date = request.args.get('date')
     return searchByDate(date)
-
-@bp.route('/multiple_activity')
-@login_required
-def multiple_activity_route():
-    return multiple_activity()
 
 @bp.route('/searchByMonth', methods=['GET'])
 @login_required

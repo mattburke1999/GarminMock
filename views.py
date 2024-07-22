@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, session, request
 from config import FLASK_ENV
-from services import register_process, login_process, single_date, month_detail, get_multiple_activity_info, get_single_activity_info, get_calendar_info
+from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info
 from functools import wraps
 
 def show_register():
@@ -28,7 +28,9 @@ def show_searchByDate_form():
 
 def searchByDate(date_str):
     result = single_date(date_str)
-    return redirect(url_for('main.multiple_activity_route')) if result[0] else render_template('searchByDate.html', error=result[1])
+    if not result[0]:
+        return show_error_page(result[1], 'single_date', 'Error getting activity information.')
+    return mult_activity(result[1]['date_title'], result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'])
 
 def show_searchByMonth_form():
     return render_template('searchByMonth.html')
@@ -42,14 +44,12 @@ def show_error_page(error, service_method, prod_error):
     
 def searchByMonth(month, year):
     result = month_detail(month, year)
-    return redirect(url_for('main.multiple_activity_route')) if result[0] else render_template('searchByMonth.html', error=result[1])
-
-def multiple_activity():
-    result = get_multiple_activity_info()
     if not result[0]:
-        return show_error_page(result[1], 'get_multiple_activity_info', 'Error getting activity information.')
-    activity_list, lap_html_list, folium_maps = result[1]
-    return render_template('multipleActivity.html', activity_list=activity_list, date_title = session['date_title'], lap_html_list=lap_html_list, folium_maps = folium_maps, zip=zip)
+        return show_error_page(result[1], 'month_detail', 'Error getting month information.')
+    return mult_activity(result[1]['date_title'], result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'])
+
+def mult_activity(date_title, activity_list, lap_html_list, folium_maps):
+    return render_template('multipleActivity.html', date_title=date_title, activity_list=activity_list, lap_html_list=lap_html_list, folium_maps=folium_maps, zip=zip)
 
 def show_searchByYear_form():
     return render_template('searchByYear.html')
@@ -65,8 +65,7 @@ def activity(activity_id):
     result = get_single_activity_info(activity_id)
     if not result[0]:
         return show_error_page(result[1], 'get_single_activity_info', 'Error getting activity information.')
-    activity_dict, lap_html, folium_map = result[1]
-    return render_template('singleActivity.html', activity=activity_dict, lap_html=lap_html, folium_map=folium_map)
+    return render_template('singleActivity.html', activity=result[1]['activity_list'], lap_html=result[1]['lap_list'], folium_map=result[1]['record_html_list'])
 
 def get_calendar():
     result = get_calendar_info()

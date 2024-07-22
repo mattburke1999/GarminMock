@@ -10,6 +10,7 @@ from queue import Queue
 import json
 import pandas as pd
 import traceback
+from numpy import array_split
 
 calendar.setfirstweekday(calendar.SUNDAY)
 redis_cnxn = redis.Redis(host='localhost', port=6379, db=0, password = environ.REDIS_PASSWORD)
@@ -72,37 +73,100 @@ def login_process(username, password):
 def prepare_activity_list(session_df, result_queue):
     activity_list = dt.prepare_multiple_activities(session_df)
     result_queue.put((activity_list, 'activity_list'))
+    return    
+
+def get_activity_info(session_df):
+    result_queue = Queue()
+    num_threads = 5
+    threads = []
+    session_df_splits = array_split(session_df, num_threads)
+    for i in range(num_threads):
+        thread = Thread(target=prepare_activity_list, args=(session_df_splits[i], result_queue))
+        threads.append(thread)
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    results = []
+    while not result_queue.empty():
+        queue_item = result_queue.get()
+        results += queue_item[0]
+    return results
+
+def prepare_lap_list(lap_df, activity_id_list, result_queue):
+    lap_list = dt.prepare_lap_info(lap_df, activity_id_list)
+    result_queue.put((lap_list, 'lap_list'))
     return
 
-def prepare_lap_html_list(lap_df, activity_id_list, result_queue):
-    lap_html_list = dt.prepare_lap_info(lap_df, activity_id_list)
-    result_queue.put((lap_html_list, 'lap_html_list'))
-    return
+def get_lap_list(lap_df, activity_id_list):
+    result_queue = Queue()
+    num_threads = 10
+    threads = []
+    lap_df_splits = array_split(lap_df, num_threads)
+    activity_id_list_splits = array_split(activity_id_list, num_threads)
+    for i in range(num_threads):
+        thread = Thread(target=prepare_lap_list, args=(lap_df_splits[i], activity_id_list_splits[i], result_queue))
+        threads.append(thread)
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    results = []
+    while not result_queue.empty():
+        queue_item = result_queue.get()
+        results += queue_item[0]
+    return results
 
 def prepare_record_html_list(record_info, activity_id_list, result_queue):
     record_html_list = dt.prepare_record_info(record_info, activity_id_list)
     result_queue.put((record_html_list, 'record_html_list'))
     return
-    
-def single_date(date_str):
-    session_df, lap_df, record_info = da.get_activity_info_by_date(pd.to_datetime(date_str).date())
-    if len(session_df) == 0:
-        print("NO ACTIVITY FOUND")
-        return (False, 'No activity found')
-    print("ACTIVITY FOUND")
-    activity_thread = Thread(target=prepare_activity_list, args=(session_df, None))
-    lap_thread = Thread(target=prepare_lap_html_list, args=(lap_df, session_df['activity_id'].to_list(), None))
-    record_thread = Thread(target=prepare_record_html_list, args=(record_info, session_df['activity_id'].to_list(), None))
+
+def prepare_record_html_list_threads(record_info, activity_id_list):
+    result_queue = Queue()
+    num_threads = 10
+    threads = []
+    record_info_splits = array_split(record_info, num_threads)
+    activity_id_list_splits = array_split(activity_id_list, num_threads)
+    for i in range(num_threads):
+        thread = Thread(target=prepare_record_html_list, args=(record_info_splits[i], activity_id_list_splits[i], result_queue))
+        threads.append(thread)
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join()
+    results = []
+    while not result_queue.empty():
+        queue_item = result_queue.get()
+        results += queue_item[0]
+    return results
+        
+def prepare_all_info_threads(session_df, lap_df, record_info):
+    result_queue = Queue()
+    activity_thread = Thread(target=prepare_activity_list, args=(session_df, result_queue))
+    lap_thread = Thread(target=prepare_lap_list, args=(lap_df, session_df['activity_id'].to_list(), result_queue))
+    record_thread = Thread(target=prepare_record_html_list, args=(record_info, session_df['activity_id'].to_list(), result_queue))
     threads = [activity_thread, lap_thread, record_thread]
     for thread in threads:
         thread.start()
     for thread in threads:
         thread.join()
-        
+    return_dict = {}
+    while not result_queue.empty():
+        queue_item = result_queue.get()
+        return_dict[queue_item[1]] = queue_item[0]
+    return return_dict
     
- 
-    session['date_title'] = pd.to_datetime(date_str).strftime('%B %d %Y')
-    return (True, None)
+def single_date(date_str):
+    session_df, lap_df, record_df = da.get_activity_info_by_date(pd.to_datetime(date_str).date())
+    if len(session_df) == 0:
+        print("NO ACTIVITY FOUND")
+        return (False, 'No activities found')
+    print("ACTIVITY FOUND")
+    date_title = pd.to_datetime(date_str).strftime('%B %d %Y')
+    all_info = prepare_all_info_threads(session_df, lap_df, record_df)
+    all_info['date_title'] = date_title
+    return (True, all_info)
 
 def month_detail(month, year):
     start_date = pd.Timestamp(f'{year}-{month}-01')
@@ -110,74 +174,19 @@ def month_detail(month, year):
     session_df, lap_df, record_df = da.get_activity_info_by_date_range(start_date.date(), end_date.date())
     if len(session_df)==0:
         print("NO ACTIVITY FOUND")
-        return (False, 'No activity found')
+        return (False, 'No activities found')
     print("ACTIVITY FOUND")
-    result_queue = Queue()
-    activity_thread = Thread(target=prepare_activity_list, args=(session_df, result_queue))
-    lap_thread = Thread(target=prepare_lap_html_list, args=(lap_df, session_df['activity_id'].to_list(), result_queue))
-    record_thread = Thread(target=prepare_record_html_list, args=(record_df, session_df['activity_id'].to_list(), result_queue))
-    threads = [activity_thread, lap_thread, record_thread]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
-        
-    while not result_queue.empty():
-        queue_item = result_queue.get()
-        session[queue_item[1]] = da.create_cookie(json.dumps(queue_item[0]))
-        
-    month_string = pd.to_datetime(f'{month}/01/{year}').strftime('%B %Y')
-    session['date_title'] = month_string
-    return (True, None)
- 
-def get_item_from_redis(item_name, result_queue, item_id): 
-    result_queue.put((json.loads(da.get_cookie_value(item_id)), item_name))
-    return
- 
-def get_multiple_activity_info():
-    try:
-        result_queue = Queue()
-        item_names = ['activity_list', 'lap_html_list', 'record_html_list']
-        threads = []
-        for item in item_names:
-            thread = Thread(target=get_item_from_redis, args=(item, result_queue, session[item]))
-            threads.append(thread)
-        for thread in threads:
-            thread.start()
-        for thread in threads:
-            thread.join()
-            
-        activity_infos = {}
-        while not result_queue.empty():
-            queue_item = result_queue.get()
-            activity_infos[queue_item[1]] = queue_item[0]
-        return (True, (activity_infos['activity_list'], activity_infos['lap_html_list'], activity_infos['record_html_list']))
-    except Exception:
-        return (False, traceback.format_exc())
+    month_string = pd.to_datetime(f'{month}/01/{year}').strftime('%B %Y')    
+    all_info = prepare_all_info_threads(session_df, lap_df, record_df)
+    all_info['date_title'] = month_string
+    return (True, all_info)
     
 def get_single_activity_info(activity_id): 
     session_info, lap_info, record_info = da.get_activity_by_id(activity_id)
     if len(session_info) == 0:
         return (False, 'No activity found')
-    result_queue = Queue()
-    activity_thread = Thread(target=prepare_activity_list, args=(session_info, result_queue))
-    lap_thread = Thread(target=prepare_lap_html_list, args=(lap_info, [activity_id], result_queue))
-    record_thread = Thread(target=prepare_record_html_list, args=(record_info, [activity_id], result_queue))
-    threads = [activity_thread, lap_thread, record_thread]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
-    
-    activity_info = {}
-    while not result_queue.empty():
-        queue_item = result_queue.get()
-        activity_info[queue_item[1]] = queue_item[0][0] if len(queue_item[0]) > 0 else None
-    
-    activity_dict = activity_info['activity_list']
-    lap_html = activity_info['lap_html_list']
-    folium_map = activity_info['record_html_list']
-    return (True, (activity_dict, lap_html, folium_map))
+    all_info = prepare_all_info_threads(session_info, lap_info, record_info)
+    return (True, all_info)
 
 def get_month_dates(month, year):
     today = pd.Timestamp.now()
