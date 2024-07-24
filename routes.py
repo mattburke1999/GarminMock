@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from views import show_register, register, login, check_login, home, homePage, show_login_form,\
     show_searchByDate_form, searchByDate, show_searchByMonth_form, searchByMonth,\
-    show_searchByYear_form, default, logout, activity, get_calendar, switch_month
+    show_searchByYear_form, default, logout, activity, get_calendar, switch_month, display_activity
 
 
 bp = Blueprint('main', __name__)
@@ -49,11 +49,15 @@ def homePage_route():
 def show_searchByDate_form_route():
     return show_searchByDate_form()
 
-@bp.route('/ByDate', methods=['GET'])
+@bp.route('/multiple_activity', methods=['GET'])
 @login_required
 def searchByDate_route():
-    date = request.args.get('date')
-    return searchByDate(date)
+    date = request.args.get('date1')
+    date2 = request.args.get('date2')
+    print(f'DATE1: {date}, DATE2: {date2}')
+    if date2: 
+        return searchByMonth(date, date2)#(month and year)
+    return searchByDate(date)#(single date)
 
 @bp.route('/searchByMonth', methods=['GET'])
 @login_required
@@ -86,7 +90,14 @@ def logout_route():
 def activity_route(activity_id):
     return activity(activity_id)
 
-@bp.route('/calendar/', methods=['GET'])
+@bp.route('/activity', methods=['POST'])
+def activity_route_post():
+    activity = request.form.get('activity')
+    lap_html = request.form.get('lap_html')
+    folium_map = request.form.get('folium_map')
+    return display_activity(activity, lap_html, folium_map)
+
+@bp.route('/calendar', methods=['GET'])
 @login_required
 def calendar_route():
     return get_calendar()

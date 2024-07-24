@@ -445,11 +445,14 @@ a {
 .titleName {
     font-size: 18px;
     text-decoration: underline;
+    font-family: 'Courier New', Courier, monospace;
     font-weight: bold;
     color: #292E2F; 
 }
 .titleName:hover {
+    background: none;
     color: #0935F9;
+    cursor: pointer;
 }
 .name {
     font-size: 18px;

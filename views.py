@@ -2,6 +2,7 @@ from flask import render_template, redirect, url_for, session, request
 from config import FLASK_ENV
 from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info
 from functools import wraps
+import ast
 
 def show_register():
     return render_template('registration.html')
@@ -65,8 +66,12 @@ def activity(activity_id):
     result = get_single_activity_info(activity_id)
     if not result[0]:
         return show_error_page(result[1], 'get_single_activity_info', 'Error getting activity information.')
-    return render_template('singleActivity.html', activity=result[1]['activity_list'], lap_html=result[1]['lap_list'], folium_map=result[1]['record_html_list'])
+    return display_activity(result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'])
 
+def display_activity(activity, lap_html, folium_map):
+    activity = ast.literal_eval(activity)
+    return render_template('singleActivity.html', activity=activity, lap_html=lap_html, folium_map=folium_map)
+    
 def get_calendar():
     result = get_calendar_info()
     if not result[0]:
