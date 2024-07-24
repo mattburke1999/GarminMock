@@ -30,17 +30,17 @@
                     <h3 class='day'>{{ day }}</h3>
                     {% for activity in activities %}
                         <a class = "activity_link" href="{{url_for('main.activity_route', activity_id=activity['activity_id'])}}">
-                            {% if activity['Sport'] == 'Running'%}
+                            {% if activity['sport'] == 'Running'%}
                             <div class='activity_running'>
-                            {% elif activity['Sport'] == 'Cycling' %}
+                            {% elif activity['sport'] == 'Cycling' %}
                             <div class='activity_cycling'>
-                            {% elif activity['Sport'] == 'Rowing' %}
+                            {% elif activity['sport'] == 'Rowing' %}
                             <div class='activity_rowing'>
                             {% else %}
                             <div class='activity_other'>
                             {% endif %}
-                                <h3 class='activ_text'> {{activity['DisplaySport']}} - {{ activity['ActivityTitle'] }} </h3>
-                                <h3 class='activ_text'> <span class="distance">{{ activity['Distance'] }} miles</span> <span class="time">{{ activity['Duration'] }}</span> </h3>                    
+                                <h3 class='activ_text'> {{activity['display_sport']}} - {{ activity['activity_title'] }} </h3>
+                                <h3 class='activ_text'> <span class="distance">{{ activity['total_distance'] }} miles</span> <span class="time">{{ activity['duration'] }}</span> </h3>                    
                             </div>
                         </a>
                     {% endfor %}
