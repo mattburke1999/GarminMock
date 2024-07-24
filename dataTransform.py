@@ -6,6 +6,10 @@ mile_dist = 1609.344
 class DataTransform:
     
     def time_seconds_to_string(self, seconds):
+        try:
+            seconds = int(seconds)
+        except ValueError:
+            return '--'
         hours = int(seconds / 3600)
         minutes = int((seconds % 3600) / 60)
         seconds = seconds % 60
@@ -45,8 +49,8 @@ class DataTransform:
     def prepare_multiple_activities(self, df):
         df['total_time'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))
         df['total_elapsed_time'] = df['total_elapsed_time'].apply(lambda x: self.time_seconds_to_string(x))
-        df['pace'] = df.apply(lambda row: self.time_seconds_to_string(row) if row['sport'] in ('running', 'rowing') else row['pace'], axis=1)
-        df['elapsed_pace'] = df.apply(lambda row: self.time_seconds_to_string(row) if row['sport'] in ('running', 'rowing') else row['pace'], axis=1)
+        df['pace'] = df.apply(lambda row: self.time_seconds_to_string(row['pace']) if row['sport'] in ('Running', 'Rowing') else row['pace'], axis=1)
+        df['elapsed_pace'] = df.apply(lambda row: self.time_seconds_to_string(row['pace']) if row['sport'] in ('Running', 'Rowing') else row['pace'], axis=1)
         df = df.sort_values(by=['start_time'])
         df = df.drop(['start_time'], axis=1)
         df = df.fillna('--')
@@ -97,8 +101,8 @@ class DataTransform:
             for day in week:
                 if day[0] != '--':
                     # find all activities where the day part of df['Date'] ( is equal to day
-                    df_for_day = df[df['Day'] == day[0]]
-                    df_for_day = df_for_day.sort_values('DateTime')
+                    df_for_day = df[df['day'] == day[0]]
+                    df_for_day = df_for_day.sort_values('start_time')
                     for i in range(len(df_for_day)):
                         activity = df_for_day.iloc[i]
                         activity_dict = activity.to_dict()
@@ -106,20 +110,7 @@ class DataTransform:
         return calendar
                     
     def prepare_calendar_info(self, df, calendar):
-        cols = df.columns.tolist()
-        
-        #df['day'] =  integer day part of date ex: '2021-03-01' -> 1, '2021-03-02' -> 2
-        df['DateTime'] = df['start_time']
-        df['Day'] = df['start_time'].apply(lambda x: int(x.strftime('%d')))
-        df['Sport'] = df['sport'].apply(lambda x: x.title())
-        df['DisplaySport'] = df[['sport','sub_sport']].apply(lambda x: x['sport'] if x['sport'] in ('running', 'cycling', 'rowing') and x['sub_sport'] in ('generic', None) else x['sub_sport'], axis=1)
-        df['DisplaySport'] = df['DisplaySport'].apply(lambda x: x.title().replace('_', ' '))
-        df['DisplaySport'] = df['DisplaySport'].apply(lambda x: x.title())
-        df['Duration'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))
-        df['Distance'] = df.apply(lambda row: float(round(row['total_distance']/mile_dist, 3)) if row['sport'] in ('running', 'cycling') else float(row['total_distance']), axis=1)
-        df['ActivityTitle'] = df['activity_title'].apply(lambda x: x.title())
-        cols.remove('activity_id')
-        
-        df = df.drop(cols, axis=1)
+        df['day'] = df['start_time'].apply(lambda x: int(x.strftime('%d')))
+        df['duration'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))
         calendar = self.add_calendar_info(df, calendar)
         return calendar
