@@ -2,6 +2,10 @@
         {% block title %}Activities{% endblock %}
         {% block head %}
             <script>
+                const activities = {{ activity_list|tojson }};
+                const lap_htmls = {{lap_html_list|tojson}};
+                const maps = {{folium_maps|tojson}};
+
                 function toggleCollapse(className, button, buttonText) {
                     var container = button.parentElement;
                     var elements = container.querySelectorAll('.' + className);
@@ -23,18 +27,28 @@
                     }
                 }
 
-                // when the window loads, change url to /multiple_activity without reloading/resetting the page
-                window.onload = function() {
-                    if (window.location.pathname !== '/multiple_activity') {
-                        window.history.replaceState({}, '', '/multiple_activity');
-                    }
+                function navigateToActivity(index) {
+                    activity = activities[index];
+                    lap_html = lap_htmls[index];
+                    folium_map = maps[index];
+
+                    document.getElementById('activity-input').value = JSON.stringify(activity);
+                    document.getElementById('lap-input').value = lap_html;
+                    document.getElementById('map-input').value = folium_map;
+
+                    document.getElementById('activity-form').submit();
                 }
             </script>
         {% endblock %}
     {% block body %}
+        <form action = '/activity' method = 'POST' id="activity-form">
+            <input type = 'hidden' name = 'activity' id = 'activity-input'>
+            <input type = 'hidden' name = 'lap_html' id = 'lap-input'>
+            <input type = 'hidden' name = 'folium_map' id = 'map-input'>
+        </form>
         <div id = 'modalBackdrop' class = 'modal-backdrop'></div>
         <h1 class ='pageTitle'>Activities for {{date_title}}</h1>
-        {% for activity, lap_html, folium_map in zip(activity_list, lap_html_list, folium_maps) %}
+        {% for activity, lap_html, folium_map, i in zip(activity_list, lap_html_list, folium_maps, list(range(len(activity_list)))) %}
             <div class="containerMult">
                 <div class='header'>
                     <div class='topHeader'>
@@ -50,14 +64,7 @@
                             <h1><span class="sport-name">{{activity['display_sport']}}</span></h1>
                         </div>
                     </div>
-                    <h1>
-                        <form action = '/activity' method = 'POST'>
-                            <input type = 'hidden' name = 'activity' value = '{{activity}}'>
-                            <input type = 'hidden' name = 'lap_html' value = '{{lap_html}}'>
-                            <input type = 'hidden' name = 'folium_map' value = '{{folium_map}}'>
-                            <button type="submit" class="titleName">{{activity['activity_title']}}</button>
-                        </form>
-                    </h1>
+                    <h1><button onclick="navigateToActivity({{i}})" class="titleName">{{activity['activity_title']}}</button></h1>
                     <h3><span class = 'name'>Description:</span> <span class = 'value'>{{activity['description']}}</span></h3>
                 </div>
                 <div class='times'>

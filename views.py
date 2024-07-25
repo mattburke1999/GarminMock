@@ -50,7 +50,7 @@ def searchByMonth(month, year):
     return mult_activity(result[1]['date_title'], result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'])
 
 def mult_activity(date_title, activity_list, lap_html_list, folium_maps):
-    return render_template('multipleActivity.html', date_title=date_title, activity_list=activity_list, lap_html_list=lap_html_list, folium_maps=folium_maps, zip=zip)
+    return render_template('multipleActivity.html', date_title=date_title, activity_list=activity_list, lap_html_list=lap_html_list, folium_maps=folium_maps, zip=zip, len=len, list=list)
 
 def show_searchByYear_form():
     return render_template('searchByYear.html')
@@ -66,10 +66,11 @@ def activity(activity_id):
     result = get_single_activity_info(activity_id)
     if not result[0]:
         return show_error_page(result[1], 'get_single_activity_info', 'Error getting activity information.')
-    return display_activity(result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'])
+    return display_activity(result[1]['activity_list'][0], result[1]['lap_list'][0], result[1]['record_html_list'][0])
 
 def display_activity(activity, lap_html, folium_map):
-    activity = ast.literal_eval(activity)
+    if type(activity) == str:
+        activity = ast.literal_eval(activity)
     return render_template('singleActivity.html', activity=activity, lap_html=lap_html, folium_map=folium_map)
     
 def get_calendar():
