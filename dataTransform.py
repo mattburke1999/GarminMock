@@ -6,18 +6,20 @@ mile_dist = 1609.344
 class DataTransform:
     
     def time_seconds_to_string(self, seconds):
-        try:
-            seconds = int(seconds)
-        except ValueError:
-            return '--'
-        hours = int(seconds / 3600)
-        minutes = int((seconds % 3600) / 60)
-        seconds = seconds % 60
-        seconds = round(seconds, 3) if seconds > 9 else f"0{round(seconds,3)}"
-        if hours == 0:
-            return f'{minutes}:{seconds}'
-        else:
-            return f'{hours}:{minutes if minutes > 9 else f"0{minutes}"}:{seconds}'
+        if seconds:
+            try:
+                seconds = int(seconds)
+            except ValueError:
+                return '--'
+            hours = int(seconds / 3600)
+            minutes = int((seconds % 3600) / 60)
+            seconds = seconds % 60
+            seconds = round(seconds, 3) if seconds > 9 else f"0{round(seconds,3)}"
+            if hours == 0:
+                return f'{minutes}:{seconds}'
+            else:
+                return f'{hours}:{minutes if minutes > 9 else f"0{minutes}"}:{seconds}'
+        return '--'
     
     def lap_dfs_to_htmls(self, lap_list):
         lap_html_list = []
@@ -50,7 +52,7 @@ class DataTransform:
         df['total_time'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))
         df['total_elapsed_time'] = df['total_elapsed_time'].apply(lambda x: self.time_seconds_to_string(x))
         df['pace'] = df.apply(lambda row: self.time_seconds_to_string(row['pace']) if row['sport'] in ('Running', 'Rowing') else row['pace'], axis=1)
-        df['elapsed_pace'] = df.apply(lambda row: self.time_seconds_to_string(row['pace']) if row['sport'] in ('Running', 'Rowing') else row['pace'], axis=1)
+        df['elapsed_pace'] = df.apply(lambda row: self.time_seconds_to_string(row['elapsed_pace']) if row['sport'] in ('Running', 'Rowing') else row['elapsed_pace'], axis=1)
         df = df.sort_values(by=['start_time'])
         df = df.drop(['start_time'], axis=1)
         df = df.fillna('--')
