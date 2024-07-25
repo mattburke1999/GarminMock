@@ -13,8 +13,9 @@ import traceback
 from numpy import array_split
 
 calendar.setfirstweekday(calendar.SUNDAY)
-redis_cnxn = redis.Redis(host='localhost', port=6379, db=0, password = environ.REDIS_PASSWORD)
-da = DataAccess(redis_cnxn)
+# redis_cnxn = redis.Redis(host='localhost', port=6379, db=0, password = environ.REDIS_PASSWORD)
+da = DataAccess()
+    # redis_cnxn)
 dt = DataTransform()
 
 def send_registration_email(email, firstname, lastname):

@@ -6,8 +6,9 @@ import uuid
 from config import Config as environ
 
 class DataAccess:
-    def __init__(self, redis_cnxn):
-        self.redis_cnxn = redis_cnxn
+    def __init__(self, redis_cnxn=None):
+        # self.redis_cnxn = redis_cnxn
+        pass
 
     def connect_to_postgres(self):
         db_params = json.loads(environ.PG_DESKTOP)
@@ -19,8 +20,8 @@ class DataAccess:
         with self.connect_to_postgres() as cnxn:
             query = 'select * from public.accounts where "userid" = %s'
             users = pd.read_sql_query(query, cnxn, params=[username])
-        stored_password_bytes = bytes(users['password'].iloc[0])
         if not users.empty:
+            stored_password_bytes = bytes(users['password'].iloc[0])
             provided_password_bytes = password.encode('utf-8')
             # Verify the password
             if bcrypt.checkpw(provided_password_bytes, stored_password_bytes):
@@ -56,17 +57,17 @@ class DataAccess:
             cnxn.commit()
         return
     
-    def create_cookie(self, value, expire=3600):
-        cookie_key = str(uuid.uuid4())
-        self.redis_cnxn.setex(cookie_key, expire, value)
-        return cookie_key
+    # def create_cookie(self, value, expire=3600):
+    #     cookie_key = str(uuid.uuid4())
+    #     self.redis_cnxn.setex(cookie_key, expire, value)
+    #     return cookie_key
 
-    def get_cookie_value(self, id):
-        value = self.redis_cnxn.get(id)
-        if value:
-            return value.decode('utf-8')
-        print('no value from redis')
-        return None
+    # def get_cookie_value(self, id):
+    #     value = self.redis_cnxn.get(id)
+    #     if value:
+    #         return value.decode('utf-8')
+    #     print('no value from redis')
+    #     return None
         
     def convert_timestamps(self, df, columns, from_tz='UTC', to_tz='America/Chicago'):
         for column in columns:
