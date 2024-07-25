@@ -142,7 +142,7 @@ def change_times(df, start_time=True):
     return df
 
 if __name__ == '__main__':
-    folder = os.environ.get('new_uploads_folder')
+    folder = r"C:\Users\mattb\OneDrive\Documents\LoginTEST\garmin data\NEW_UPLOADS"
     files = os.listdir(folder)
     files = [f for f in files if f.endswith('.fit')]
     for file in files:

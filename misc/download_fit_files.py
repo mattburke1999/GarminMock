@@ -54,37 +54,24 @@ def find_max_date():
 
 def get_activity_dates(driver, max_start_date, activities = []):
     time.sleep(3)
-    max_date = pd.to_datetime('2024-05-09')
-    min_date = pd.to_datetime('2024-03-13')
     new_activities = driver.find_elements(By.CLASS_NAME, 'training-activity-row') # find all activities (rows)
     # extract (date, link) from each row
-    new_activities = [(pd.to_datetime(activity.find_element(By.CLASS_NAME, 'view-col.col-date').text.split(', ')[1]), activity.find_element(By.CLASS_NAME, 'view-col.col-title').find_element(By.TAG_NAME, 'a').get_attribute('href')) for activity in new_activities]
+    new_activities = [(pd.to_datetime(activity.find_element(By.CLASS_NAME, 'view-col.col-date').text.split(', ')[1]), 
+                       activity.find_element(By.CLASS_NAME, 'view-col.col-title').find_element(By.TAG_NAME, 'a').get_attribute('href')) 
+                      for activity in new_activities]
     new_activities.sort(key=lambda x: x[0]) # sort by date
     if len(new_activities) > 0:
         oldest_activity_date = new_activities[0][0]
         print(f'OLDEST ACTIVITY DATE: {oldest_activity_date}')
-        print(f'Min: {min_date}, Max: {max_date}')
-        if oldest_activity_date > min_date and oldest_activity_date < max_date:
+        if oldest_activity_date < max_start_date:
             print('CONDITION 1')
-            new_activities = [activity for activity in new_activities if activity[0] > min_date and activity[0] < max_date] # filter out activities before min_date and after max_date
+            new_activities = [activity for activity in new_activities if activity[0] >= max_start_date] # filter out activities before  max_date
             activities += new_activities
-            driver.find_element(By.XPATH, '/html/body/div[2]/nav/div/ul/li[2]/button').click()
-            return get_activity_dates(driver, max_start_date, activities) # repeat with next page
-        elif oldest_activity_date <= min_date:
-            print('CONDITION 2')
             return activities
-        else: # oldest_activity_date >= max_date
-            print('CONDITION 3')
+        else: # oldest_activity_date >= max_start_date
+            print('CONDITION 2')
             driver.find_element(By.XPATH, '/html/body/div[2]/nav/div/ul/li[2]/button').click() # next page
-            return get_activity_dates(driver, max_start_date, activities) # repeat with next page
-        
-        # if oldest_activity_date < max_start_date:
-        #     new_activities = [activity for activity in new_activities if activity[0] >= max_start_date] # filter out activities before max_date
-        #     activities += new_activities
-        #     return activities # no need to go to next page
-        # else:  # oldest_activity_date >= max_start_date
-        #     driver.find_element(By.XPATH, '/html/body/div[2]/nav/div/ul/li[2]/button').click() # next page
-        #     return get_activity_dates(driver, max_start_date, activities + new_activities) # repeat with next page
+            return get_activity_dates(driver, max_start_date, activities + new_activities) # repeat with next page
     return activities
 
 def rename_file(link):
