@@ -197,8 +197,8 @@ def prepare_rendered_info(all_info):
         templates.append(template)
     return templates
 
-def get_home_page_posts(offset, limit, render=False):
-    session_df, lap_df, record_df = da.get_recent_posts(session['accountid'], offset, limit)
+def get_home_page_posts(offset, limit, sport, render=False):
+    session_df, lap_df, record_df = da.get_recent_posts(session['accountid'], offset, limit, sport)
     if len(session_df) == 0:
         return (False, 'No activities found')
     all_info = prepare_all_info_threads(session_df, lap_df, record_df, desc_order=True)

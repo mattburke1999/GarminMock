@@ -21,14 +21,14 @@ def show_login_form(login_error):
 def home():
     return redirect(url_for('main.show_login_form_route'))
 
-def homePage():
-    result = get_home_page_posts(0, 15)
+def homePage(sport=None):
+    result = get_home_page_posts(0, 15, sport)
     if not result[0]:
         return show_error_page(result[1], 'get_home_page_posts', 'Error getting home page posts.')
     return mult_activity(None, result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'], enable_load_more=True)
 
-def get_more_posts(offset):
-    result = get_home_page_posts(offset, 10, render=True)
+def get_more_posts(offset, limit, sport):
+    result = get_home_page_posts(offset, limit, sport, render=True)
     if not result[0]:
         return jsonify((False, 'No more posts found'))
     return jsonify((True, result[1]))

@@ -6,6 +6,8 @@
                 const lap_htmls = {{lap_html_list|tojson}};
                 const maps = {{folium_maps|tojson}};
 
+                var sportFilter = undefined;
+
                 function toggleCollapse(className, button, buttonText) {
                     var container = button.parentElement;
                     var elements = container.querySelectorAll('.' + className);
@@ -50,15 +52,20 @@
     {% if date_title %}
         <h1 class ='pageTitle'>Activities for {{date_title}}</h1>
     {% endif %}
+    <div class="filters" id='filter-button-container'>
+        <button class="filter-button" onclick="filterPosts('Running', this)">Running</button>
+        <button class="filter-button" onclick="filterPosts('Cycling', this)">Cycling</button>
+        <button class="filter-button" onclick="filterPosts('Rowing', this)">Rowing</button>
+        <button class="filter-button" onclick="filterPosts('Other', this)">Other</button>
+    </div>
     <div id='posts-container'>
         {% for activity, lap_html, folium_map, i in zip(activity_list, lap_html_list, folium_maps, list(range(len(activity_list)))) %}
             {% include "_activity.html" with context %}
         {% endfor %}
     </div>    
-    <div id="loading" style="display: none;">Loading...</div>
+    <div id="loading" class='loading' style="display: none;">Loading...</div>
     {% if enable_load_more %}
         <script>
-
             let offset = 15;
         
             $(window).scroll(function() {
@@ -66,6 +73,47 @@
                     loadMoreItems();
                 }
             });
+
+            function setHighlightButton(button) {
+                filterContainer = document.getElementById('filter-button-container');
+                buttons = Array.from(filterContainer.getElementsByTagName('button'));
+                // remove s from class name of button if it exists
+                console.log(buttons);
+                buttons.forEach(b => {
+                    b.className = b.className.replace(' s', '');
+                });
+                if(button) {
+                    button.className += ' s';
+                }
+                // if button is undefined(ie they clicked the already highlighted button), then no button should be highlighted
+                return;
+                
+            }
+
+            function filterPosts(sport, button) {
+                if (sport === sportFilter) {
+                    sportFilter = undefined;
+                    button = undefined;
+                }
+                else {
+                    sportFilter = sport;
+                }
+                setHighlightButton(button);
+                $.ajax({
+                    url: '/filter_posts',
+                    type: 'GET',
+                    data: {
+                        sport: sportFilter
+                    },
+                    success: function(data) {
+                        $('#posts-container').html(data[1]);
+                        offset = 15;
+                    },
+                    error: function() {
+                        console.error('Error filtering posts');
+                    }
+                });
+            }
 
             function loadMoreItems() {
                 if ($('#loading').is(':visible')) return;
@@ -77,7 +125,7 @@
                     type: 'GET',
                     data: {
                         offset: offset,
-                        limit: 10
+                        sport: sportFilter
                     },
                     success: function(data) {
                         console.log(data);

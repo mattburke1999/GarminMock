@@ -39,11 +39,18 @@ def show_login_form_route():
 def homePage_route():
     return homePage()
 
+@bp.route('/filter_posts', methods=['GET'])
+@login_required
+def filter_posts_route():
+    sport = request.args.get('sport')
+    return get_more_posts(0, 15, sport)
+
 @bp.route('/load_more', methods=['GET'])
 @login_required
 def load_more_route():
     offset = request.args.get('offset')
-    return get_more_posts(offset)
+    sport = request.args.get('sport')
+    return get_more_posts(offset, 10, sport)
 
 @bp.route('/searchPage', methods=['GET'])
 @login_required

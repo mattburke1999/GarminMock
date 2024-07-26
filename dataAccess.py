@@ -81,11 +81,11 @@ class DataAccess:
                     df[column] = df[column].dt.tz_convert(to_tz)
         return df
     
-    def get_recent_posts(self, accountid,  offset, limit):
+    def get_recent_posts(self, accountid,  offset, limit, sport):
         with self.connect_to_postgres() as cnxn:
             cnxn.autocommit = False
             with cnxn.cursor() as cursor:
-                cursor.callproc('get_recent_posts', (accountid, offset, limit))
+                cursor.callproc('get_recent_posts', (accountid, sport, offset, limit))
 
                 session_curs, lap_curs, record_curs = cursor.fetchone()
                 
