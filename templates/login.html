@@ -5,12 +5,17 @@
         <link rel="stylesheet" type="text/css" href="../static/css/multipleActivity.css">
     </head>
     <body class = loginPage>
-        <h1>Log In</h1>
+        <div class="logo-container">
+            <img src="../static/images/logo.png" alt="logo" class="logo">
+        </div>
         <div class="loginContainer">
             <form method="post" action="/login">
                 {% if show_error %}
                     <h5 style="color:red"> The username or password is incorrect. </h5>
                 {% endif %}
+                <div class='button-container'>
+                    <h1>Log In</h1>
+                </div>
                 <div>
                     <input type="text" class = 'loginInput' placeholder="Username" name="username" required>
                 </div>
