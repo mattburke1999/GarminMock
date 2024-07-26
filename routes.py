@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from views import show_register, register, login, check_login, home, homePage, show_login_form,\
-    show_searchByDate_form, searchByDate, show_searchByMonth_form, searchByMonth,\
-    show_searchByYear_form, default, logout, activity, get_calendar, switch_month, display_activity
+    show_searchByDate_form, searchByDate, show_searchByMonth_form, searchByMonth,display_activity,\
+    show_searchByYear_form, default, logout, activity, get_calendar, switch_month, searchPage, get_more_posts
 
 
 bp = Blueprint('main', __name__)
@@ -34,15 +34,21 @@ def show_login_form_route():
     print(f'LOGIN ERROR: {login_error}')
     return show_login_form(login_error)
 
-@bp.route('/')
-@login_required
-def home_route():
-    return home()
-
-@bp.route('/homePage', methods=['GET'])
+@bp.route('/', methods=['GET'])
 @login_required
 def homePage_route():
     return homePage()
+
+@bp.route('/load_more', methods=['GET'])
+@login_required
+def load_more_route():
+    offset = request.args.get('offset')
+    return get_more_posts(offset)
+
+@bp.route('/searchPage', methods=['GET'])
+@login_required
+def searchPage_route():
+    return searchPage()
 
 @bp.route('/searchByDate', methods=['GET'])
 @login_required

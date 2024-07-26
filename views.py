@@ -1,6 +1,6 @@
-from flask import render_template, redirect, url_for, session, request
+from flask import render_template, redirect, url_for, session, request, jsonify
 from config import FLASK_ENV
-from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info
+from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info, get_home_page_posts
 from functools import wraps
 import ast
 
@@ -22,7 +22,19 @@ def home():
     return redirect(url_for('main.show_login_form_route'))
 
 def homePage():
-    return render_template('homePage.html')
+    result = get_home_page_posts(0, 15)
+    if not result[0]:
+        return show_error_page(result[1], 'get_home_page_posts', 'Error getting home page posts.')
+    return mult_activity(None, result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'], enable_load_more=True)
+
+def get_more_posts(offset):
+    result = get_home_page_posts(offset, 10, render=True)
+    if not result[0]:
+        return jsonify((False, 'No more posts found'))
+    return jsonify((True, result[1]))
+
+def searchPage():
+    return render_template('searchPage.html')
 
 def show_searchByDate_form():
     return render_template('searchByDate.html')
@@ -31,7 +43,7 @@ def searchByDate(date_str):
     result = single_date(date_str)
     if not result[0]:
         return show_error_page(result[1], 'single_date', 'Error getting activity information.')
-    return mult_activity(result[1]['date_title'], result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'])
+    return mult_activity(None, result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'])
 
 def show_searchByMonth_form():
     return render_template('searchByMonth.html')
@@ -49,8 +61,8 @@ def searchByMonth(month, year):
         return show_error_page(result[1], 'month_detail', 'Error getting month information.')
     return mult_activity(result[1]['date_title'], result[1]['activity_list'], result[1]['lap_list'], result[1]['record_html_list'])
 
-def mult_activity(date_title, activity_list, lap_html_list, folium_maps):
-    return render_template('multipleActivity.html', date_title=date_title, activity_list=activity_list, lap_html_list=lap_html_list, folium_maps=folium_maps, zip=zip, len=len, list=list)
+def mult_activity(date_title, activity_list, lap_html_list, folium_maps, enable_load_more=False):
+    return render_template('multipleActivity.html', date_title=date_title, activity_list=activity_list, lap_html_list=lap_html_list, folium_maps=folium_maps, zip=zip, len=len, list=list, enable_load_more=enable_load_more)
 
 def show_searchByYear_form():
     return render_template('searchByYear.html')

@@ -48,12 +48,12 @@ class DataTransform:
         lap_html_list = self.lap_dfs_to_htmls(lap_list)
         return lap_html_list
     
-    def prepare_multiple_activities(self, df):
+    def prepare_multiple_activities(self, df, desc_order):
         df['total_time'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))
         df['total_elapsed_time'] = df['total_elapsed_time'].apply(lambda x: self.time_seconds_to_string(x))
         df['pace'] = df.apply(lambda row: self.time_seconds_to_string(row['pace']) if row['sport'] in ('Running', 'Rowing') else row['pace'], axis=1)
         df['elapsed_pace'] = df.apply(lambda row: self.time_seconds_to_string(row['elapsed_pace']) if row['sport'] in ('Running', 'Rowing') else row['elapsed_pace'], axis=1)
-        df = df.sort_values(by=['start_time'])
+        df = df.sort_values(by=['start_time'], ascending = not desc_order)
         df = df.drop(['start_time'], axis=1)
         df = df.fillna('--')
         # convert to list of dictionaries
@@ -87,7 +87,6 @@ class DataTransform:
     def prepare_record_info(self, record_info, activity_id_list):
         map_htmls = []
         record_info = record_info[record_info['activity_id'].isin(activity_id_list)]
-        record_info = record_info.sort_values('timestamp')
         for activity_id in activity_id_list:
             activity_df = record_info[record_info['activity_id'] == activity_id]
             map_folium = self.build_map(activity_df)

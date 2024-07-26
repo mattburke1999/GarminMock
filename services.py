@@ -7,9 +7,8 @@ from flask import session
 from threading import Thread
 import redis
 from queue import Queue
-import json
+from flask import render_template
 import pandas as pd
-import traceback
 from numpy import array_split
 
 calendar.setfirstweekday(calendar.SUNDAY)
@@ -66,13 +65,15 @@ def login_process(username, password):
     account_id = da.verify_user(username, password)
     if account_id is not None:
         session['logged_in'] = True
+        session['accountid'] = int(account_id)
         return (True, None)
     else:
         session['logged_in'] = False
+        session['accountid'] = None
         return (False, 'Invalid username or password')
         
-def prepare_activity_list(session_df, result_queue):
-    activity_list = dt.prepare_multiple_activities(session_df)
+def prepare_activity_list(session_df, result_queue, desc_order):
+    activity_list = dt.prepare_multiple_activities(session_df, desc_order)
     result_queue.put((activity_list, 'activity_list'))
     return    
 
@@ -142,9 +143,9 @@ def prepare_record_html_list_threads(record_info, activity_id_list):
         results += queue_item[0]
     return results
         
-def prepare_all_info_threads(session_df, lap_df, record_info):
+def prepare_all_info_threads(session_df, lap_df, record_info, desc_order=False):
     result_queue = Queue()
-    activity_thread = Thread(target=prepare_activity_list, args=(session_df, result_queue))
+    activity_thread = Thread(target=prepare_activity_list, args=(session_df, result_queue, desc_order))
     lap_thread = Thread(target=prepare_lap_list, args=(lap_df, session_df['activity_id'].to_list(), result_queue))
     record_thread = Thread(target=prepare_record_html_list, args=(record_info, session_df['activity_id'].to_list(), result_queue))
     threads = [activity_thread, lap_thread, record_thread]
@@ -159,7 +160,7 @@ def prepare_all_info_threads(session_df, lap_df, record_info):
     return return_dict
     
 def single_date(date_str):
-    session_df, lap_df, record_df = da.get_activity_info_by_date(pd.to_datetime(date_str).date())
+    session_df, lap_df, record_df = da.get_activity_info_by_date(pd.to_datetime(date_str).date(), session['accountid'])
     if len(session_df) == 0:
         print("NO ACTIVITY FOUND")
         return (False, 'No activities found')
@@ -172,7 +173,7 @@ def single_date(date_str):
 def month_detail(month, year):
     start_date = pd.Timestamp(f'{year}-{month}-01')
     end_date = pd.Timestamp(f'{year}-{month}-01') + pd.offsets.MonthEnd(0)
-    session_df, lap_df, record_df = da.get_activity_info_by_date_range(start_date.date(), end_date.date())
+    session_df, lap_df, record_df = da.get_activity_info_by_date_range(start_date.date(), end_date.date(), session['accountid'])
     if len(session_df)==0:
         print("NO ACTIVITY FOUND")
         return (False, 'No activities found')
@@ -187,6 +188,22 @@ def get_single_activity_info(activity_id):
     if len(session_info) == 0:
         return (False, 'No activity found')
     all_info = prepare_all_info_threads(session_info, lap_info, record_info)
+    return (True, all_info)
+
+def prepare_rendered_info(all_info):
+    templates = []
+    for activity, lap_html, folium_map, i in zip(all_info['activity_list'], all_info['lap_list'], all_info['record_html_list'], list(range(len(all_info['activity_list'])))):
+        template = render_template('_activity.html', activity=activity, lap_html=lap_html, folium_map=folium_map, i=i)
+        templates.append(template)
+    return templates
+
+def get_home_page_posts(offset, limit, render=False):
+    session_df, lap_df, record_df = da.get_recent_posts(session['accountid'], offset, limit)
+    if len(session_df) == 0:
+        return (False, 'No activities found')
+    all_info = prepare_all_info_threads(session_df, lap_df, record_df, desc_order=True)
+    if render:
+        all_info = prepare_rendered_info(all_info)
     return (True, all_info)
 
 def get_month_dates(month, year):
@@ -219,7 +236,7 @@ def get_calendar_info():
         cal = calendar.monthcalendar(year, month)
         cal = [['--' if day == 0 else day for day in week] for week in cal] # add day numbers to calendar
         cal = [[(day, []) for day in week] for week in cal] # change each day to a tuple with an empty list
-        activity_info = da.get_calendar_info(year, month)
+        activity_info = da.get_calendar_info(year, month, session['accountid'])
         if len(activity_info) > 0:
             cal = dt.prepare_calendar_info(activity_info, cal)
         return (True, (cal, month_string, month, year, current_month))

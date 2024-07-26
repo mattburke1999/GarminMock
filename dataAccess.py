@@ -25,7 +25,7 @@ class DataAccess:
             provided_password_bytes = password.encode('utf-8')
             # Verify the password
             if bcrypt.checkpw(provided_password_bytes, stored_password_bytes):
-                return users['accountid'].iloc[0]  # Login successful
+                return users['id'].iloc[0]  # Login successful
             else:
                 return None  # Password does not match
         else:
@@ -49,7 +49,7 @@ class DataAccess:
     def register_user(self, firstname, lastname, userid, password):
         with self.connect_to_postgres() as cnxn:          
             query = '''
-                insert into public.accounts("accountid", "firstname", "lastname", "userid", "password", "creationdate")
+                insert into public.accounts("id", "firstname", "lastname", "userid", "password", "creationdate")
                 values(%s,%s,%s,%s,%s, current_timestamp)    
             '''
             params = [self.get_new_account_id(), firstname, lastname, userid, self.hash_password(password)]
@@ -80,12 +80,25 @@ class DataAccess:
                     # If already timezone-aware, directly convert to the new timezone
                     df[column] = df[column].dt.tz_convert(to_tz)
         return df
-
-    def get_activity_info_by_date(self, date):
+    
+    def get_recent_posts(self, accountid,  offset, limit):
         with self.connect_to_postgres() as cnxn:
             cnxn.autocommit = False
             with cnxn.cursor() as cursor:
-                cursor.callproc('get_activity_info_by_date', (date,))
+                cursor.callproc('get_recent_posts', (accountid, offset, limit))
+
+                session_curs, lap_curs, record_curs = cursor.fetchone()
+                
+                session_df = pd.read_sql_query(f'FETCH ALL IN "{session_curs}"', cnxn)
+                lap_df = pd.read_sql_query(f'FETCH ALL IN "{lap_curs}"', cnxn)
+                record_df = pd.read_sql_query(f'FETCH ALL IN "{record_curs}"', cnxn)
+        return session_df, lap_df, record_df
+
+    def get_activity_info_by_date(self, date, accountid):
+        with self.connect_to_postgres() as cnxn:
+            cnxn.autocommit = False
+            with cnxn.cursor() as cursor:
+                cursor.callproc('get_activity_info_by_date', (date, accountid))
 
                 session_curs, lap_curs, record_curs = cursor.fetchone()
 
@@ -95,12 +108,12 @@ class DataAccess:
 
         return session_info, lap_info, record_info
 
-    def get_activity_info_by_date_range(self, start_date, end_date):
+    def get_activity_info_by_date_range(self, start_date, end_date, accountid):
         with self.connect_to_postgres() as cnxn:
             cnxn.autocommit = False
             with cnxn.cursor() as cursor:
                 cursor = cnxn.cursor()
-                cursor.callproc('get_activity_info_by_date_range', (start_date, end_date))
+                cursor.callproc('get_activity_info_by_date_range', (start_date, end_date, accountid))
 
                 session_curs, lap_curs, record_curs = cursor.fetchone()
 
@@ -137,7 +150,7 @@ class DataAccess:
         
         return session_info, lap_info, record_info
     
-    def get_calendar_info(self, year, month):
+    def get_calendar_info(self, year, month, accountid):
         with self.connect_to_postgres() as cnxn:
             query = 'select * from public.calendar_info(%s, %s)'
             df = self.convert_timestamps(pd.read_sql_query(query, cnxn, params=[month, year]), ['start_time'])

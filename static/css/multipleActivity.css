@@ -442,6 +442,10 @@ a {
     display: flex;
     padding-bottom: 20px;
 }
+
+#posts-container {
+    margin-top: 65px;
+}
 .titleName {
     font-size: 18px;
     text-decoration: underline;
