@@ -18,7 +18,7 @@ class DataAccess:
     
     def verify_user(self, username, password):
         with self.connect_to_postgres() as cnxn:
-            query = 'select * from public.accounts where "userid" = %s'
+            query = 'select id, userid, password from public.accounts where "userid" = %s'
             users = pd.read_sql_query(query, cnxn, params=[username])
         if not users.empty:
             stored_password_bytes = bytes(users['password'].iloc[0])
