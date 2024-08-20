@@ -2,13 +2,8 @@
 {% block title %}Edit{% endblock %}
 {% block body %}
     <div class="search-container">
-        <div class="edit-options">
-            <button class='active' onclick="show_outer_form('Edit Activity', this)">Edit Activity</button>
-            <button onclick="show_outer_form('Merge Activities', this)">Merge Activities</button>
-            <button onclick="show_outer_form('Delete Activity', this)">Delete Activity</button>
-        </div>
         <div class="search-form" id='edit-activity-div'>
-            <h1>Edit Activity</h1>
+            <h1>Search Activities</h1>
             <div class='search-options'>
                 <button class='active' onclick="show_search_inputs('date', 'edit-activity-div', this)">Search by Date</button>
                 <button onclick="show_search_inputs('title', 'edit-activity-div', this)">Search by Activity Title</button>
@@ -16,27 +11,35 @@
             <form method="get" action="/search_activities_for_edit">
                 <input type="date" name="date" placeholder="Date" required>
                 <input type="text" name="title" placeholder="Activity Title" style='display:none;'>
-                <br><br>
                 <button onclick="search_activities(this.parentElement, event)" name="search">Search</button>
             </form>
         </div>
-        <div id='search-results' class="search-results" >
-            <ul></ul>
+        
+        <div id='search-results' class="search-results" style="display: none;">
+            <div class="edit-options">
+                <button id='edit-option-edit' style='opacity: 50%; pointer-events: none;' disabled>Edit Activity</button>
+                <button id='edit-option-merge' style='opacity: 50%; pointer-events: none;' disabled>Merge Activities</button>
+                <button id='edit-option-delete' style='opacity: 50%; pointer-events: none;' disabled>Delete Activities</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Activity Title</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>Sport</th>
+                        <th>Time</th>
+                        <th>Distance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
         </div>
     </div>
     <script>
-        function show_outer_form(title, button) {
-            let div = document.getElementById('edit-activity-div');
-            div.getElementsByTagName('h1')[0].innerText = title;
-            var buttons = document.getElementsByClassName('edit-options')[0].getElementsByTagName('button');
-            for (var i = 0; i < buttons.length; i++) {
-                buttons[i].classList.remove('active');
-            }
-            if (!button.classList.contains('active')){
-                button.classList.add('active');
-            }
-        }
-
+        
         function show_search_inputs(input_type, div_id, button) {
             var inputs = document.getElementById(div_id).getElementsByTagName('input');
             var form = document.getElementById(div_id).getElementsByTagName('form')[0];
@@ -59,50 +62,126 @@
                 button.classList.add('active');
             }
         }
+
+        function toggleEditOptions() {
+            // if 1 row is selected, show edit and delete options
+            // if 2 rows are selected, show merge option and delete option
+            // if 3 or more rows are selected, show only delete option
+            let selected_rows = document.querySelectorAll('input[name="activity_id"]:checked');
+            let num_selected = selected_rows.length;
+            let edit_btn = document.getElementById('edit-option-edit');
+            let merge_btn = document.getElementById('edit-option-merge');
+            let delete_btn = document.getElementById('edit-option-delete');
+            if(num_selected===0) {
+                edit_btn.style.opacity = 0.5;
+                edit_btn.style.pointerEvents = 'none';
+                edit_btn.disabled = true;
+                edit_btn.classList.remove('edit-option-button');
+                merge_btn.style.opacity = 0.5;
+                merge_btn.style.pointerEvents = 'none';
+                merge_btn.disabled = true;
+                merge_btn.classList.remove('edit-option-button');
+                delete_btn.style.opacity = 0.5;
+                delete_btn.style.pointerEvents = 'none';
+                delete_btn.disabled = true;
+                delete_btn.classList.remove('edit-option-button');
+            } else if(num_selected===1) {
+                edit_btn.style.opacity = 1;
+                edit_btn.style.pointerEvents = 'auto';
+                edit_btn.disabled = false;
+                if(!edit_btn.classList.contains('edit-option-button')) {
+                    edit_btn.classList.add('edit-option-button');
+                }
+                merge_btn.style.opacity = 0.5;
+                merge_btn.style.pointerEvents = 'none';
+                merge_btn.disabled = true;
+                merge_btn.classList.remove('edit-option-button');
+                delete_btn.style.opacity = 1;
+                delete_btn.style.pointerEvents = 'auto';
+                delete_btn.disabled = false;
+                if(!delete_btn.classList.contains('edit-option-button')) {
+                    delete_btn.classList.add('edit-option-button');
+                }
+            } else if(num_selected===2) {
+                edit_btn.style.opacity = 0.5;
+                edit_btn.style.pointerEvents = 'none';
+                edit_btn.disabled = true;
+                edit_btn.classList.remove('edit-option-button');
+                merge_btn.style.opacity = 1;
+                merge_btn.style.pointerEvents = 'auto';
+                merge_btn.disabled = false;
+                if(!merge_btn.classList.contains('edit-option-button')) {
+                    merge_btn.classList.add('edit-option-button');
+                }
+                delete_btn.style.opacity = 1;
+                delete_btn.style.pointerEvents = 'auto';
+                delete_btn.disabled = false;
+                if(!delete_btn.classList.contains('edit-option-button')) {
+                    delete_btn.classList.add('edit-option-button');
+                }
+            } else {
+                edit_btn.style.opacity = 0.5;
+                edit_btn.style.pointerEvents = 'none';
+                edit_btn.disabled = true;
+                merge_btn.style.opacity = 0.5;
+                merge_btn.style.pointerEvents = 'none';
+                merge_btn.disabled = true;
+                delete_btn.style.opacity = 1;
+                delete_btn.style.pointerEvents = 'auto';
+                delete_btn.disabled = false;
+                if(!delete_btn.classList.contains('edit-option-button')) {
+                    delete_btn.classList.add('edit-option-button');
+                }
+            }
+        }
+
+        function select_row_checkbox(row, checkbox) {
+            if (row !== undefined) {
+                checkbox = row.getElementsByClassName('checkbox')[0].getElementsByTagName('input')[0];
+            }
+            checkbox.checked = !checkbox.checked;
+            toggleEditOptions();
+        }
+        
         function display_search_results(activity_list) {
-            example_result = [
-                {
-                    "activity_id": "11947108956",
-                    "activity_title": "Running Activity",
-                    "description": "",
-                    "display_date": "Sunday, July 21  2:02 PM",
-                    "display_sport": "Running",
-                    "total_distance": 7.012,
-                    "total_time": "47:51"
-                },
-                {
-                    "activity_id": "11937401333",
-                    "activity_title": "Running Activity",
-                    "description": "",
-                    "display_date": "Saturday, July 20  11:31 AM",
-                    "display_sport": "Running",
-                    "total_distance": 4.076,
-                    "total_time": "27:03"
-                }];
-            // display as a row
-            let ul = document.getElementById('search-results').getElementsByTagName('ul')[0];
-            ul.innerHTML = '';
+            let searchResults = document.getElementById('search-results');
+            let table = searchResults.getElementsByTagName('table')[0];
+            let tbody = table.getElementsByTagName('tbody')[0];
             for (let i = 0; i < activity_list.length; i++) {
                 let activity = activity_list[i];
-                let li = document.createElement('li');
-                li.innerHTML = `
-                        <div class='activity-info'>
-                            <h3>${activity['activity_title']}</h3>
-                            <p>${activity['display_date']}</p>
-                            <p>${activity['display_sport']}</p>
-                            <p>${activity['total_distance']} miles</p>
-                            <p>${activity['total_time']}</p>
-                        </div>
-                `;
-                ul.appendChild(li);
+                if (activity['description'].length > 70) {
+                    activity['description'] = activity['description'].substring(0, 70) + '...';
+                }
+                let row = tbody.insertRow(i);
+                // set the entire row onclick to select the checkbox
+                row.onclick = function() {select_row_checkbox(this, undefined);};
+                row.onmouseover = function() {this.style.backgroundColor = 'lightgray'; this.style.cursor = 'pointer'; this.getElementsByClassName('checkbox')[0].style.backgroundColor = 'white';};
+                row.onmouseout = function() {this.style.backgroundColor = 'white';};
+                let checkbox = row.insertCell(0);
+                checkbox.onclick = function() {select_row_checkbox(undefined, this);};
+                let title = row.insertCell(1);
+                let description = row.insertCell(2);
+                let date = row.insertCell(3);
+                let sport = row.insertCell(4);
+                let time = row.insertCell(5);
+                let distance = row.insertCell(6);
+                checkbox.innerHTML = '<input type="checkbox" name="activity_id" value="' + activity['activity_id'] + '">';
+                checkbox.classList.add('checkbox');
+                title.innerHTML = activity['activity_title'];
+                description.innerHTML = activity['description'];
+                date.innerHTML = activity['start_time'];
+                sport.innerHTML = activity['display_sport'];
+                time.innerHTML = activity['total_time'];
+                distance.innerHTML = activity['total_distance'];
             }
-                
+            searchResults.style.display = 'block';            
         }
         function search_activities(form, event) {
             event.preventDefault();
             let inputs = form.getElementsByTagName('input');
-            let $input = inputs[0].style.display == 'block' ? inputs[0] : inputs[1];
-            let input_type = inputs[0].style.display == 'block' ? 'date' : 'title';
+            let $input = inputs[0].style.display !== 'none' ? inputs[0] : inputs[1];
+            let input_type = inputs[0].style.display !== 'none' ? 'date' : 'title';
+            console.log($input.value, input_type);
             $.ajax({
                 url: '/search_activities_for_edit',
                 type: 'GET',

@@ -71,12 +71,12 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
-.edit-options button:hover, .search-options button:hover {
+.edit-option-button:hover, .search-options button:hover {
     background-color: #2A75B4;
     color: white;
 }
 
-.edit-options button.active, .search-options button.active{
+.search-options button.active{
     background-color: #2A75B4;
     color: white;
 }
@@ -147,9 +147,25 @@ h1, .stats-button, .splits-button {
     font-family: comic sans ms, sans-serif;
 }
 .search-results {
-    margin-left: 2em;
+    margin-left: 1em;
     max-height: 50vh;
     overflow-y: auto;
+}
+.search-results table {
+    font-size: 12px;
+}
+.search-results td {
+    border: 1px solid #000000;
+    border-radius: 2px;
+    border-collapse: collapse;
+    padding: 5px;
+    text-align: center;
+}
+.search-results td:nth-child(1) {
+    border: none;
+}
+.search-results td:nth-child(4) {
+    width: 125px;
 }
 .search-form {
     width: 82%; 
