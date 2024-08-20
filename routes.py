@@ -1,7 +1,8 @@
 from flask import Blueprint, request
 from views import show_register, register, login, check_login, home, homePage, show_login_form,\
     show_searchByDate_form, searchByDate, show_searchByMonth_form, searchByMonth,display_activity,\
-    show_searchByYear_form, default, logout, activity, get_calendar, switch_month, searchPage, get_more_posts
+    show_searchByYear_form, default, logout, activity, get_calendar, switch_month, searchPage, get_more_posts, \
+    show_edit_form, search_activities_for_editing
 
 
 bp = Blueprint('main', __name__)
@@ -119,3 +120,15 @@ def calendar_route():
 @login_required
 def switch_month_route(year, month):
    return switch_month(year, month)
+
+@bp.route('/edit_form', methods=['GET'])
+@login_required
+def show_edit_form_route():
+    return show_edit_form()
+
+@bp.route('/search_activities_for_edit', methods=['GET'])
+@login_required
+def search_activities_for_edit_route():
+    input = request.args.get('input')
+    input_type = request.args.get('input_type')
+    return search_activities_for_editing(input, input_type)

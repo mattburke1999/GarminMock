@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Edit{% endblock %}
+{% block body %}
+    <div class="search-container">
+        <div class="edit-options">
+            <button class='active' onclick="show_outer_form('Edit Activity', this)">Edit Activity</button>
+            <button onclick="show_outer_form('Merge Activities', this)">Merge Activities</button>
+            <button onclick="show_outer_form('Delete Activity', this)">Delete Activity</button>
+        </div>
+        <div class="search-form" id='edit-activity-div'>
+            <h1>Edit Activity</h1>
+            <div class='search-options'>
+                <button class='active' onclick="show_search_inputs('date', 'edit-activity-div', this)">Search by Date</button>
+                <button onclick="show_search_inputs('title', 'edit-activity-div', this)">Search by Activity Title</button>
+            </div>
+            <form method="get" action="/search_activities_for_edit">
+                <input type="date" name="date" placeholder="Date" required>
+                <input type="text" name="title" placeholder="Activity Title" style='display:none;'>
+                <br><br>
+                <button onclick="search_activities(this.parentElement, event)" name="search">Search</button>
+            </form>
+        </div>
+        <div id='search-results' class="search-results" >
+            <ul></ul>
+        </div>
+    </div>
+    <script>
+        function show_outer_form(title, button) {
+            let div = document.getElementById('edit-activity-div');
+            div.getElementsByTagName('h1')[0].innerText = title;
+            var buttons = document.getElementsByClassName('edit-options')[0].getElementsByTagName('button');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+            }
+            if (!button.classList.contains('active')){
+                button.classList.add('active');
+            }
+        }
+
+        function show_search_inputs(input_type, div_id, button) {
+            var inputs = document.getElementById(div_id).getElementsByTagName('input');
+            var form = document.getElementById(div_id).getElementsByTagName('form')[0];
+            if (input_type == 'date') {
+                inputs[0].style.display = 'block';
+                inputs[0].required = true;
+                inputs[1].style.display = 'none';
+                inputs[1].required = false;
+            } else {
+                inputs[0].style.display = 'none';
+                inputs[0].required = false;
+                inputs[1].style.display = 'block';
+                inputs[1].required = true;
+            }
+            var buttons = document.getElementById(div_id).getElementsByClassName('search-options')[0].getElementsByTagName('button');
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+            }
+            if (!button.classList.contains('active')){
+                button.classList.add('active');
+            }
+        }
+        function display_search_results(activity_list) {
+            example_result = [
+                {
+                    "activity_id": "11947108956",
+                    "activity_title": "Running Activity",
+                    "description": "",
+                    "display_date": "Sunday, July 21  2:02 PM",
+                    "display_sport": "Running",
+                    "total_distance": 7.012,
+                    "total_time": "47:51"
+                },
+                {
+                    "activity_id": "11937401333",
+                    "activity_title": "Running Activity",
+                    "description": "",
+                    "display_date": "Saturday, July 20  11:31 AM",
+                    "display_sport": "Running",
+                    "total_distance": 4.076,
+                    "total_time": "27:03"
+                }];
+            // display as a row
+            let ul = document.getElementById('search-results').getElementsByTagName('ul')[0];
+            ul.innerHTML = '';
+            for (let i = 0; i < activity_list.length; i++) {
+                let activity = activity_list[i];
+                let li = document.createElement('li');
+                li.innerHTML = `
+                        <div class='activity-info'>
+                            <h3>${activity['activity_title']}</h3>
+                            <p>${activity['display_date']}</p>
+                            <p>${activity['display_sport']}</p>
+                            <p>${activity['total_distance']} miles</p>
+                            <p>${activity['total_time']}</p>
+                        </div>
+                `;
+                ul.appendChild(li);
+            }
+                
+        }
+        function search_activities(form, event) {
+            event.preventDefault();
+            let inputs = form.getElementsByTagName('input');
+            let $input = inputs[0].style.display == 'block' ? inputs[0] : inputs[1];
+            let input_type = inputs[0].style.display == 'block' ? 'date' : 'title';
+            $.ajax({
+                url: '/search_activities_for_edit',
+                type: 'GET',
+                data: {
+                    input: $input.value,
+                    input_type: input_type
+                },
+                success: function(response) {
+                    activity_list = response['success'];
+                    display_search_results(activity_list);
+                },
+                error: function(response) {
+                    console.log('error');
+                    alert('Error searching for activities');
+                    
+                }
+            });
+        }
+    </script>
+{% endblock %}

@@ -155,3 +155,9 @@ class DataAccess:
             query = 'select * from public.calendar_info(%s, %s)'
             df = self.convert_timestamps(pd.read_sql_query(query, cnxn, params=[month, year]), ['start_time'])
         return df
+    
+    def search_activities_for_editing(self, date, title, accountid):
+        with self.connect_to_postgres() as cnxn:
+            query = 'SELECT * from public.search_activity_by_date(%s, %s, %s)'
+            df = pd.read_sql_query(query, cnxn, params=[date, title, accountid])
+        return df

@@ -243,3 +243,12 @@ def get_calendar_info():
     except Exception as e:
         return (False, str(e))
         
+def search_for_editing(input, input_type):
+    date = input if input_type == 'date' else None
+    title = input if input_type == 'title' else None
+    try:
+        search_results = da.search_activities_for_editing(date, title, session['accountid'])
+        search_results['total_time'] = search_results['total_time'].apply(lambda x: dt.time_seconds_to_string(x))
+        return (True, search_results.to_dict(orient='records'))
+    except Exception as e:
+        return (False, str(e))

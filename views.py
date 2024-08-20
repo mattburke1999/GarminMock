@@ -1,6 +1,6 @@
-from flask import render_template, redirect, url_for, session, request, jsonify
+from flask import render_template, redirect, url_for, session, request, jsonify, make_response
 from config import FLASK_ENV
-from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info, get_home_page_posts
+from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info, get_home_page_posts, search_for_editing
 from functools import wraps
 import ast
 
@@ -105,3 +105,13 @@ def check_login(f):
             return redirect(url_for('main.show_login_form_route', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
+
+def show_edit_form():
+    return render_template('editPage.html')
+
+def search_activities_for_editing(input, input_type):
+    result = search_for_editing(input, input_type)
+    if not result[0]:
+        print("FALSE")
+        return make_response(jsonify({'error': result[1]}), 400)
+    return make_response(jsonify({'success': result[1]}), 200)
