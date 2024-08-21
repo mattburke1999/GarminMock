@@ -1,69 +1,139 @@
 
 <div id='mergeConfirmation' class="modal-backdrop" style='display:none;'>
     <div class="merge-confirmation">
+        <h1>Are you sure you want to merge these activities?</h1>
+        <h2></h2>
+        <button onclick='open_merge_modal()'>Yes, Merge Activities</button>
+        <button onclick='closeMergeConfirmation()'>No, Cancel</button>
     </div>
 </div>
-<div id='mergeActivities' class='merge-activities' style='display:none;'>
-    <h1 class='merge-title'>Merge Activities</h1>
-    <div id='merge-activity1' class='merge-activity'>
-        <h2>Activity 1</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Activity Title</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                    <th>Sport</th>
-                    <th>Time</th>
-                    <th>Distance</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-    <div class='swap-merge-activities'>
-        <div class='swap-merge-activities-button' onclick='swapActivities()'>
-            <svg
-                width="50"
-                height="50"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path d="M12 16H13.5L13.5 10H15.5L15.5 16H17L14.5 19L12 16Z" fill="currentColor" />
-                <path d="M8 8H9.5L9.5 14H11.5L11.5 8H13L10.5 5L8 8Z" fill="currentColor" />
-            </svg>
+<div id='mergeActivities' class='modal-backdrop' style='display:none;'>
+    <div class='merge-activities'>
+        <h1 class='merge-title'>Merge Activities</h1>
+        <div id='merge-activity1' class='merge-activity'>
+            <h2>Activity 1</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Activity Title</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>Sport</th>
+                        <th>Time</th>
+                        <th>Distance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
         </div>
+        <div class='swap-merge-activities'>
+            <div class='swap-merge-activities-button' onclick='swapActivities()'>
+                <svg
+                    width="50"
+                    height="50"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    <path d="M12 16H13.5L13.5 10H15.5L15.5 16H17L14.5 19L12 16Z" fill="currentColor" />
+                    <path d="M8 8H9.5L9.5 14H11.5L11.5 8H13L10.5 5L8 8Z" fill="currentColor" />
+                </svg>
+            </div>
+        </div>
+        <div id='merge-activity2' class='merge-activity'>
+            <h2>Activity 2</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Activity Title</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>Sport</th>
+                        <th>Time</th>
+                        <th>Distance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <button class='merge-activities-button'>Merge Activities</button>
+        <button class='merge-activities-button' onclick='closeMergeActivities()'>Cancel</button>
     </div>
-    <div id='merge-activity2' class='merge-activity'>
-        <h2>Activity 2</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Activity Title</th>
-                    <th>Description</th>
-                    <th>Date</th>
-                    <th>Sport</th>
-                    <th>Time</th>
-                    <th>Distance</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
-    <button class='merge-activities-button'>Merge Activities</button>
 </div>
 <script>
+    let activity1;
+    let activity2;
     function swapActivities() {
-        const activity1 = document.getElementById('merge-activity1');
-        const activity2 = document.getElementById('merge-activity2');
-        let activity1HTML = activity1.innerHTML;
-        activity1HTML.replace('Activity 1', 'Activity 2');
-        let activity2HTML = activity2.innerHTML;
-        activity2HTML.replace('Activity 2', 'Activity 1');
-        activity1.innerHTML = activity2HTML;
-        activity2.innerHTML = activity1HTML;
+        const activity1Element = document.getElementById('merge-activity1');
+        const activity2Element = document.getElementById('merge-activity2');
+        let activity1HTML = activity1Element.innerHTML.replace('Activity 1', 'Activity 2');
+        let activity2HTML = activity2Element.innerHTML.replace('Activity 2', 'Activity 1');
+        activity1Element.innerHTML = activity2HTML;
+        activity2Element.innerHTML = activity1HTML;
+        let temp = activity1;
+        activity1 = activity2;
+        activity2 = temp;
+        localStorage.setItem('activity1', JSON.stringify(activity1));
+        localStorage.setItem('activity2', JSON.stringify(activity2));
     }
+    function closeMergeConfirmation() {
+        let mergeConfirmationModal = document.getElementById('mergeConfirmation');
+        let mergeConfirmation = mergeConfirmationModal.getElementsByClassName('merge-confirmation')[0];
+        mergeConfirmation.innerHTML = '';
+        mergeConfirmationModal.style.display = 'none';
+        localStorage.removeItem('mergeModalDisplayed');
+        document.body.classList.remove('hidden');
+    }
+    function closeMergeActivities() {
+        let mergeActivitiesModal = document.getElementById('mergeActivities');
+        let mergeActivities = mergeActivitiesModal.getElementsByClassName('merge-activities')[0];
+        mergeActivities.innerHTML = '';
+        mergeActivitiesModal.style.display = 'none';
+        localStorage.removeItem('mergeModalDisplayed');
+        document.body.classList.remove('hidden');
+    }
+    function insert_row_data_into_table(table, row_data) {
+        table.innerHTML = '';
+        let row = table.insertRow();
+        let activity_id = row.insertCell(0);
+        let title = row.insertCell(1);
+        let description = row.insertCell(2);
+        let date = row.insertCell(3);
+        let sport = row.insertCell(4);
+        let time = row.insertCell(5);
+        let distance = row.insertCell(6);
+        activity_id.style.border = 'none';
+        activity_id.innerHTML = `<input type='hidden' value='${row_data.activity_id}'/>`;
+        title.innerHTML = row_data.activity_title;
+        description.innerHTML = row_data.description;
+        date.innerHTML = row_data.start_time;
+        sport.innerHTML = row_data.display_sport;
+        time.innerHTML = row_data.total_time;
+        distance.innerHTML = row_data.total_distance;
+    }
+
+    function open_merge_modal() {
+        const activity1Table = document.getElementById('merge-activity1').querySelector('tbody');
+        const activity2Table = document.getElementById('merge-activity2').querySelector('tbody');
+        insert_row_data_into_table(activity1Table, activity1);
+        insert_row_data_into_table(activity2Table, activity2);
+        document.getElementById('mergeActivities').style.display = 'flex';
+        document.getElementById('mergeConfirmation').style.display = 'none';
+        localStorage.setItem('mergeModalDisplayed', 'true');
+        localStorage.setItem('activity1', JSON.stringify(activity1));
+        localStorage.setItem('activity2', JSON.stringify(activity2));
+        document.body.classList.add('hidden');
+    }
+    window.onload = function() {
+        // save the state of the modal
+        if (localStorage.getItem('mergeModalDisplayed') === 'true') {
+            activity1 = JSON.parse(localStorage.getItem('activity1'));
+            activity2 = JSON.parse(localStorage.getItem('activity2'));
+            open_merge_modal();
+        }
+    };
 </script>

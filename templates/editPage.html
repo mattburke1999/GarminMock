@@ -155,6 +155,7 @@
             event.stopPropagation();
             if (row !== undefined) {
                 checkbox = row.getElementsByClassName('checkbox')[0].getElementsByTagName('input')[0];
+            }
             checkbox.checked = !checkbox.checked;
             toggleEditOptions();
         }
@@ -253,44 +254,28 @@
             });
             return activity_data;
         }
-        function closeMergeConfirmation() {
-            let mergeConfirmationModal = document.getElementById('mergeConfirmation');
-            let mergeConfirmation = mergeConfirmationModal.getElementsByClassName('merge-confirmation')[0];
-            mergeConfirmation.innerHTML = '';
-            mergeConfirmationModal.style.display = 'none';
-        }
-        function displayMergeConfirmation(data) {
-            let mergeConfirmationModal = document.getElementById('mergeConfirmation');
-            let mergeConfirmation = mergeConfirmationModal.getElementsByClassName('merge-confirmation')[0];
-            let h1 = document.createElement('h1');
-            h1.innerHTML = 'Are you sure you want to merge these activities?';
-            let h2 = document.createElement('h2');
-            let yesButton = document.createElement('button');
-            yesButton.innerHTML = 'Yes, Merge Activities';
-            yesButton.onclick = function() {mergeActivities();};
-            let noButton = document.createElement('button');
-            noButton.innerHTML = 'No, Cancel';
-            noButton.onclick = function() {closeMergeConfirmation();};
-            if(data['date_diff']){
-                h2.innerHTML = `It appears these activities were tracked ${data['date_diff']} days apart.`;
+        function displayMergeConfirmation(confirm_data) {
+            let modal = document.getElementById('mergeConfirmation')
+            let mergeConfirmation = modal.getElementsByClassName('merge-confirmation')[0];
+            let h2 = mergeConfirmation.getElementsByTagName('h2')[0];
+            h2.innerHTML = '';
+            if(confirm_data['date_diff']){
+                h2.innerHTML = `It appears these activities were tracked ${confirm_data['date_diff']} days apart.`;
             } else { //sport diff
-                let sport1 = data['sport_diff'][0];
-                let sport2 = data['sport_diff'][1];
+                let sport1 = confirm_data['sport_diff'][0];
+                let sport2 = confirm_data['sport_diff'][1];
                 h2.innerHTML = `It appears these activities were tracked as different sports: ${sport1} and ${sport2}.`;
             }
-            mergeConfirmation.appendChild(h1);
-            mergeConfirmation.appendChild(h2);
-            mergeConfirmation.appendChild(yesButton);
-            mergeConfirmation.appendChild(noButton);
-            mergeConfirmationModal.style.display = 'flex';
+            console.log('display')
+            modal.style.display = 'flex';
+            document.body.classList.add('hidden');
         }
 
         function mergeActivities() {
             let activity_data = getSelectedRowData_merge();
 
-            let activity1 = activity_data[0];
-            console.log(activity1);
-            let activity2 = activity_data[1];
+            activity1 = activity_data[0];
+            activity2 = activity_data[1];
             $.ajax({
                 url: '/merge_check',
                 type: 'POST',
@@ -300,8 +285,9 @@
                     activity2: activity2
                 }),
                 success: function(response) {
+                    
                     if (response.data === '') {
-                        // success
+                        open_merge_modal();
                     } else {
                         displayMergeConfirmation(response.data);
                     }
