@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, session, request, jsonify, make_response
 from config import FLASK_ENV
-from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info, get_home_page_posts, search_for_editing
+from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info, get_home_page_posts, search_for_editing, merge_check_process
 from functools import wraps
 import ast
 
@@ -115,3 +115,9 @@ def search_activities_for_editing(input, input_type):
         print("FALSE")
         return make_response(jsonify({'error': result[1]}), 400)
     return make_response(jsonify({'success': result[1]}), 200)
+
+def merge_check(activity1, activity2):
+    result = merge_check_process(activity1, activity2)
+    if result[0]:
+        return make_response(jsonify({'data': result[1]}), 200)
+    return make_response(jsonify({'error': result[1]}), 400)

@@ -4,6 +4,7 @@ body {
     padding: 0;
     background: linear-gradient(to right, #f0f0f0, #ffffff);
     color: #333;
+    height: 100%;
 }
 .containerMult {
     width: 60%; /* Decrease the width */
@@ -71,17 +72,19 @@ body {
     font-family: 'Roboto', sans-serif;
 }
 
-.edit-option-button:hover, .search-options button:hover {
+.search-options button.active, 
+.edit-option-button:hover, 
+.search-options button:hover,
+.swap-merge-activities-button:hover,
+.filter-button.s, 
+.submitButton, 
+.splits-button2, 
+.stats-button2,
+.merge-confirmation button{
     background-color: #2A75B4;
     color: white;
 }
-
-.search-options button.active{
-    background-color: #2A75B4;
-    color: white;
-}
-.search-container {
-    width: 40%;
+.search-container, .search-container2 {
     margin-top: 65px;
     margin-inline: auto;
     overflow: hidden;
@@ -89,6 +92,53 @@ body {
     background-color: #fff;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.search-container {
+    width: 40%;
+}
+.search-container2 {
+    width: 60%;
+}
+.search-result-activity_title {
+    width: 22%;
+}
+.search-result-description {
+    width: 25%;
+}
+.search-result-date {
+    width: 20%;
+}
+.search-result-sport {
+    width: 9%;
+}
+
+.search-result-time {
+    width: 7%;
+}
+.search-result-distance {
+    width: 11%;
+}
+.merge-confirmation {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    align-self: center;
+    height: fit-content;
+    width: 67%;
+    margin: auto;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+.merge-confirmation button {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Roboto', sans-serif;
 }
 .bottomModalContainer {
     position: relative;
@@ -112,6 +162,36 @@ body {
     box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
     border-radius: 10px;
     transition: all 0.3s ease;
+}
+.merge-activities{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 66%;
+    margin: 10px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    border-radius: 10px;
+}
+.merge-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #292E2F; 
+    text-align: center;
+}
+.merge-activities table {
+    width: 100%;
+}
+.merge-activities td {
+    border: 1px solid #000000;
+    border-radius: 2px;
+    border-collapse: collapse;
+    padding: 5px;
+    text-align: center;
+}
+.merge-activity:nth-of-type(3){
+    margin-bottom: 20px;
 }
 .containerMult:hover {
     box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
@@ -147,7 +227,6 @@ h1, .stats-button, .splits-button {
     font-family: comic sans ms, sans-serif;
 }
 .search-results {
-    margin-left: 1em;
     max-height: 50vh;
     overflow-y: auto;
 }
@@ -164,10 +243,7 @@ h1, .stats-button, .splits-button {
 .search-results td:nth-child(1) {
     border: none;
 }
-.search-results td:nth-child(4) {
-    width: 125px;
-}
-.search-form {
+.search-form{
     width: 82%; 
     margin-top: 2em;
     margin-left: auto;
@@ -184,6 +260,20 @@ h1, .stats-button, .splits-button {
     text-align: center;
     font-family: comic sans ms, sans-serif;
     margin-bottom: 10px;
+}
+.swap-merge-activities {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    margin-top: 10px;
+}
+.swap-merge-activities-button {
+    display: flex;
+    width: 10%;
+    height: 60%;
+    justify-content: center;
+    padding: 10px;
+    border-radius: 5px;
 }
 .close{
     display: flex;
@@ -212,8 +302,6 @@ button:hover {
     margin-bottom: 0px;
     height: 15px;
     border-radius: 5px;
-    background-color: #2A75B4;
-    color: #fff;
     font-size: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -250,8 +338,6 @@ button:hover {
     margin-left: 2%;
     height: 15px;
     border-radius: 5px;
-    background-color: #2A75B4;
-    color: #fff;
     font-size: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -412,8 +498,6 @@ input::placeholder, textarea::placeholder {
     border: none;
     padding: 10px;
     border-radius: 5px;
-    background-color: #2A75B4;
-    color: #fff;
     font-size: 15px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -528,10 +612,6 @@ a {
     border-radius: 5px;
     padding: 5px;
     font-family: 'Courier New', Courier, monospace;
-}
-.filter-button.s {
-    background: #2A75B4;
-    color: white;
 }
 .titleName {
     font-size: 18px;

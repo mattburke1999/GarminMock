@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Edit{% endblock %}
 {% block body %}
-    <div class="search-container">
+    {% include '_mergeActivities.html' %}
+    <div id='search-container' class="search-container2">
         <div class="search-form" id='edit-activity-div'>
             <h1>Search Activities</h1>
             <div class='search-options'>
@@ -15,27 +16,42 @@
             </form>
         </div>
         
-        <div id='search-results' class="search-results" style="display: none;">
+        <div id='search-results' class="search-results-container" style="display: none;">
             <div class="edit-options">
-                <button id='edit-option-edit' style='opacity: 50%; pointer-events: none;' disabled>Edit Activity</button>
-                <button id='edit-option-merge' style='opacity: 50%; pointer-events: none;' disabled>Merge Activities</button>
-                <button id='edit-option-delete' style='opacity: 50%; pointer-events: none;' disabled>Delete Activities</button>
+                <button 
+                    id='edit-option-edit' 
+                    style='opacity: 50%; pointer-events: none;'
+                    disabled
+                >Edit Activity</button>
+                <button 
+                    id='edit-option-merge' 
+                    style='opacity: 50%; pointer-events: none;' 
+                    onclick="mergeActivities()"
+                    disabled
+                >Merge Activities</button>
+                <button 
+                    id='edit-option-delete' 
+                    style='opacity: 50%; pointer-events: none;' 
+                    disabled
+                >Delete Activities</button>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Activity Title</th>
-                        <th>Description</th>
-                        <th>Date</th>
-                        <th>Sport</th>
-                        <th>Time</th>
-                        <th>Distance</th>
-                    </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
+            <div class="search-results">
+                <table>
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Activity Title</th>
+                            <th>Description</th>
+                            <th>Date</th>
+                            <th>Sport</th>
+                            <th>Time</th>
+                            <th>Distance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     <script>
@@ -135,14 +151,18 @@
             }
         }
 
-        function select_row_checkbox(row, checkbox) {
+        function select_row_checkbox(event, row, checkbox) {
+            event.stopPropagation();
             if (row !== undefined) {
                 checkbox = row.getElementsByClassName('checkbox')[0].getElementsByTagName('input')[0];
-            }
             checkbox.checked = !checkbox.checked;
             toggleEditOptions();
         }
-        
+        function select_row_checkbox2(checkbox) {
+            checkbox.checked = !checkbox.checked;
+            toggleEditOptions();
+        }
+
         function display_search_results(activity_list) {
             let searchResults = document.getElementById('search-results');
             let table = searchResults.getElementsByTagName('table')[0];
@@ -154,34 +174,47 @@
                 }
                 let row = tbody.insertRow(i);
                 // set the entire row onclick to select the checkbox
-                row.onclick = function() {select_row_checkbox(this, undefined);};
+                row.onclick = function() {select_row_checkbox(event, this, undefined);};
                 row.onmouseover = function() {this.style.backgroundColor = 'lightgray'; this.style.cursor = 'pointer'; this.getElementsByClassName('checkbox')[0].style.backgroundColor = 'white';};
                 row.onmouseout = function() {this.style.backgroundColor = 'white';};
                 let checkbox = row.insertCell(0);
-                checkbox.onclick = function() {select_row_checkbox(undefined, this);};
+                checkbox.onclick = function() {select_row_checkbox2(this);};
                 let title = row.insertCell(1);
                 let description = row.insertCell(2);
                 let date = row.insertCell(3);
                 let sport = row.insertCell(4);
                 let time = row.insertCell(5);
                 let distance = row.insertCell(6);
-                checkbox.innerHTML = '<input type="checkbox" name="activity_id" value="' + activity['activity_id'] + '">';
+                checkbox.innerHTML = `<input type="checkbox" onclick='select_row_checkbox(event, undefined, this.parentElement)' name="activity_id" value=" ${activity['activity_id']}">`;
                 checkbox.classList.add('checkbox');
                 title.innerHTML = activity['activity_title'];
+                title.classList.add('search-result-activity-title');
                 description.innerHTML = activity['description'];
+                description.classList.add('search-result-description');
                 date.innerHTML = activity['start_time'];
+                date.classList.add('search-result-date');
                 sport.innerHTML = activity['display_sport'];
+                sport.classList.add('search-result-sport');
                 time.innerHTML = activity['total_time'];
-                distance.innerHTML = activity['total_distance'];
+                time.classList.add('search-result-time');
+                distance.innerHTML = `${activity['total_distance']} ${activity['display_sport']==='Rowing' ? 'm.' : 'mi.'}`;
+                distance.classList.add('search-result-distance');
             }
             searchResults.style.display = 'block';            
         }
+        function clearSelectedRows() {
+            let selected_rows = document.querySelectorAll('input[name="activity_id"]:checked');
+            selected_rows.forEach(row => {
+                row.checked = false;
+            });
+            toggleEditOptions();
+        }
         function search_activities(form, event) {
             event.preventDefault();
+            clearSelectedRows();
             let inputs = form.getElementsByTagName('input');
             let $input = inputs[0].style.display !== 'none' ? inputs[0] : inputs[1];
             let input_type = inputs[0].style.display !== 'none' ? 'date' : 'title';
-            console.log($input.value, input_type);
             $.ajax({
                 url: '/search_activities_for_edit',
                 type: 'GET',
@@ -197,6 +230,85 @@
                     console.log('error');
                     alert('Error searching for activities');
                     
+                }
+            });
+        }
+
+        function getSelectedRowData_merge() {
+            let selected_rows = document.querySelectorAll('input[name="activity_id"]:checked');
+            let activity_data = [];
+            selected_rows.forEach(row => {
+                let tr = row.parentElement.parentElement;
+                let cells = tr.getElementsByTagName('td');
+                let data = {
+                    'activity_id': row.value,
+                    'activity_title': cells[1].innerHTML,
+                    'description': cells[2].innerHTML,
+                    'start_time': cells[3].innerHTML,
+                    'display_sport': cells[4].innerHTML,
+                    'total_time': cells[5].innerHTML,
+                    'total_distance': cells[6].innerHTML
+                };
+                activity_data.push(data);
+            });
+            return activity_data;
+        }
+        function closeMergeConfirmation() {
+            let mergeConfirmationModal = document.getElementById('mergeConfirmation');
+            let mergeConfirmation = mergeConfirmationModal.getElementsByClassName('merge-confirmation')[0];
+            mergeConfirmation.innerHTML = '';
+            mergeConfirmationModal.style.display = 'none';
+        }
+        function displayMergeConfirmation(data) {
+            let mergeConfirmationModal = document.getElementById('mergeConfirmation');
+            let mergeConfirmation = mergeConfirmationModal.getElementsByClassName('merge-confirmation')[0];
+            let h1 = document.createElement('h1');
+            h1.innerHTML = 'Are you sure you want to merge these activities?';
+            let h2 = document.createElement('h2');
+            let yesButton = document.createElement('button');
+            yesButton.innerHTML = 'Yes, Merge Activities';
+            yesButton.onclick = function() {mergeActivities();};
+            let noButton = document.createElement('button');
+            noButton.innerHTML = 'No, Cancel';
+            noButton.onclick = function() {closeMergeConfirmation();};
+            if(data['date_diff']){
+                h2.innerHTML = `It appears these activities were tracked ${data['date_diff']} days apart.`;
+            } else { //sport diff
+                let sport1 = data['sport_diff'][0];
+                let sport2 = data['sport_diff'][1];
+                h2.innerHTML = `It appears these activities were tracked as different sports: ${sport1} and ${sport2}.`;
+            }
+            mergeConfirmation.appendChild(h1);
+            mergeConfirmation.appendChild(h2);
+            mergeConfirmation.appendChild(yesButton);
+            mergeConfirmation.appendChild(noButton);
+            mergeConfirmationModal.style.display = 'flex';
+        }
+
+        function mergeActivities() {
+            let activity_data = getSelectedRowData_merge();
+
+            let activity1 = activity_data[0];
+            console.log(activity1);
+            let activity2 = activity_data[1];
+            $.ajax({
+                url: '/merge_check',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    activity1: activity1,
+                    activity2: activity2
+                }),
+                success: function(response) {
+                    if (response.data === '') {
+                        // success
+                    } else {
+                        displayMergeConfirmation(response.data);
+                    }
+                },
+                error: function(response) {
+                    console.log('error');
+                    alert('Error merging activities');
                 }
             });
         }

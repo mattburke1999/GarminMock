@@ -1,8 +1,8 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, flash
 from views import show_register, register, login, check_login, home, homePage, show_login_form,\
     show_searchByDate_form, searchByDate, show_searchByMonth_form, searchByMonth,display_activity,\
     show_searchByYear_form, default, logout, activity, get_calendar, switch_month, searchPage, get_more_posts, \
-    show_edit_form, search_activities_for_editing
+    show_edit_form, search_activities_for_editing, merge_check
 
 
 bp = Blueprint('main', __name__)
@@ -132,3 +132,11 @@ def search_activities_for_edit_route():
     input = request.args.get('input')
     input_type = request.args.get('input_type')
     return search_activities_for_editing(input, input_type)
+
+@bp.route('/merge_check', methods=['POST'])
+@login_required
+def merge_check_route():
+    data = request.get_json()
+    activity1 = data.get('activity1')
+    activity2 = data.get('activity2')
+    return merge_check(activity1, activity2)

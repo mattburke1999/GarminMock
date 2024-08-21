@@ -252,3 +252,20 @@ def search_for_editing(input, input_type):
         return (True, search_results.to_dict(orient='records'))
     except Exception as e:
         return (False, str(e))
+ 
+ 
+# {'activity_id': '11947108956', 'activity_title': 'Running Activity', 'description': '', 'start_time': '7/21/2024 2:02 pm', 'display_sport': 'Running', 'total_time': '47:51', 'total_distance': '7.01 mi.'}   
+def merge_check_process(activity1, activity2):
+    try:
+        date1 = pd.to_datetime(activity1['start_time']).date()
+        date2 = pd.to_datetime(activity2['start_time']).date()
+        if date1 != date2:
+            day_diff = abs((date1 - date2).days)
+            return (True, {'date_diff': day_diff})
+        sport1 = activity1['display_sport']
+        sport2 = activity2['display_sport']
+        if sport1 != sport2:
+            return (True, {'sport_diff': (sport1, sport2)})
+        return (True, '')
+    except Exception as e:
+        return (False, str(e))
