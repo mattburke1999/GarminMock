@@ -18,7 +18,6 @@
                 <button onclick="search_activities(this.parentElement, event)" name="search">Search</button>
             </form>
         </div>
-        
         <div id='search-results' class="search-results-container" style="display: none;">
             <div class="edit-options">
                 <button 
@@ -29,7 +28,7 @@
                 <button 
                     id='edit-option-merge' 
                     style='opacity: 50%; pointer-events: none;' 
-                    onclick="mergeActivities()"
+                    onclick="merge_check()"
                     disabled
                 >Merge Activities</button>
                 <button 

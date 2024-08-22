@@ -115,3 +115,67 @@ class DataTransform:
         df['duration'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))
         calendar = self.add_calendar_info(df, calendar)
         return calendar
+    
+    def merge_records(self, records1, records2):
+        # find timedelta between the last record of the first activity and the first record of the second activity
+        time_diff = (records2['timestamp'].iloc[0] - records1['timestamp'].iloc[-1])
+        # add this timedelta to the second activity to remove the gap
+        records2['timestamp'] = records2['timestamp'] - time_diff
+        max_dist1 = records1['distance'].iloc[-1]
+        # add the max distance of the first activity to the second activity to calculate the total distance
+        records2['distance'] = records2['distance'] + max_dist1
+
+        new_records = pd.concat([records1, records2], ignore_index=True)
+        return new_records
+    
+    def calculate_lap_data_from_records(self, records, start_distance, start_time, start_lat, start_long, laps=[]):
+        # start_distance = records['distance'].iloc[start_index]
+        end_distance = start_distance + mile_dist
+        num_full_laps = int(records['distance'].iloc[-1]/mile_dist)
+        start_index = records['distance'].sub(start_distance).abs().idxmin()
+        if end_distance < records['distance'].iloc[-1] and len(laps) < num_full_laps:
+            end_index = records['distance'].sub(end_distance).abs().idxmin()
+            dist1 = records['distance'].iloc[end_index-1] - start_distance
+            dist2 = records['distance'].iloc[end_index] - start_distance
+            time1 = records['timestamp'].iloc[end_index - 1]
+            lat1 = records['position_lat'].iloc[end_index - 1]
+            long1 = records['position_long'].iloc[end_index - 1]
+            time2 = records['timestamp'].iloc[end_index]
+            lat2 = records['position_lat'].iloc[end_index]
+            long2 = records['position_long'].iloc[end_index]
+
+            # Calculate the exact time at which the distance was exactly 1609.75 meters
+            # We use linear interpolation
+            mile_time = time1 + (time2 - time1) * (mile_dist - dist1) / (dist2 - dist1)
+            
+            # Calculate the exact latitude and longitude at which the distance was exactly 1609.75 meters
+            calc_lat = lat1 + (lat2 - lat1) * (mile_dist - dist1) / (dist2 - dist1)
+            calc_long = long1 + (long2 - long1) * (mile_dist - dist1) / (dist2 - dist1)
+            
+            # calculate avg heart rate
+            avg_hr = records['heart_rate'].iloc[start_index:end_index].mean()
+            max_hr = records['heart_rate'].iloc[start_index:end_index].max()
+            
+            # calculate avg cadence
+            avg_cadence = records['cadence'].iloc[start_index:end_index].mean()
+            max_cadence = records['cadence'].iloc[start_index:end_index].max()
+
+            # Calculate the total mile time
+            mile_duration = mile_time - start_time
+            laps.append((mile_duration.total_seconds(), start_time, mile_dist, start_lat, start_long, calc_lat, calc_long, avg_hr, max_hr, avg_cadence, max_cadence))
+            return self.calculate_lap_data_from_records(records, end_distance, mile_time, calc_lat, calc_long, laps)
+        else:
+            # get remainder time
+            mile_duration = records['timestamp'].iloc[-1] - start_time
+            partial_dist = records['distance'].iloc[-1] - start_distance
+            
+            avg_hr = records['heart_rate'].iloc[start_index:].mean()
+            max_hr = records['heart_rate'].iloc[start_index:].max()
+            avg_cadence = records['cadence'].iloc[start_index:].mean()
+            max_cadence = records['cadence'].iloc[start_index:].max()
+            
+            laps.append((mile_duration.total_seconds(), start_time, partial_dist, start_lat, start_long, records['position_lat'].iloc[-1], records['position_long'].iloc[-1], avg_hr, max_hr, avg_cadence, max_cadence))
+            return laps
+        
+    def finalize_lap_data(self, lap_data):
+        pass

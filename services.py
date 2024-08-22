@@ -269,3 +269,15 @@ def merge_check_process(activity1, activity2):
         return (True, '')
     except Exception as e:
         return (False, str(e))
+    
+def merge_activities_process(activity1, activity2):
+    try:
+        record1 = da.get_record_by_activity_id(activity1)
+        record2 = da.get_record_by_activity_id(activity2)
+        new_record = dt.merge_records(record1, record2)
+        lap_data = dt.calculate_lap_data_from_records(new_record, new_record['timestamp'].iloc[0], new_record['position_lat'].iloc[0], new_record['position_long'].iloc[0])
+        lap_data = dt.finalize_lap_data(lap_data)
+        result = 'I will finish this later'
+        return (True, result)
+    except Exception as e:
+        return (False, str(e))

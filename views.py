@@ -121,3 +121,6 @@ def merge_check(activity1, activity2):
     if result[0]:
         return make_response(jsonify({'data': result[1]}), 200)
     return make_response(jsonify({'error': result[1]}), 400)
+
+def merge_activities(activity1, activity2):
+    pass

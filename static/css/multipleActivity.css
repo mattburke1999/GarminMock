@@ -60,16 +60,18 @@ body {
     display: flex;
     justify-content: center;
 }
-.edit-options button, .search-options button {
+.edit-options button, .search-options button, .merge-confirmation button, .merge-activities button {
     margin: 10px;
     padding: 10px;
-    border: 1px solid #2A75B4;
     border-radius: 5px;
-    background-color: white;
-    color: #2A75B4;
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: 'Roboto', sans-serif;
+}
+.edit-options button, .search-options button{
+    border: 1px solid #2A75B4;
+    background-color: white;
+    color: #2A75B4;
 }
 
 .search-options button.active, 
@@ -81,7 +83,7 @@ body {
 .splits-button2, 
 .stats-button2,
 .merge-confirmation button,
-.merge-activities-button{
+.merge-activities button{
     background-color: #2A75B4;
     color: white;
 }
@@ -100,7 +102,7 @@ body {
 .search-container2 {
     width: 60%;
 }
-.search-result-activity_title {
+.search-result-activity-title {
     width: 22%;
 }
 .search-result-description {
@@ -131,14 +133,7 @@ body {
     margin: auto;
     background-color: #fff;
     box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-}
-.merge-confirmation button {
-    margin: 10px;
-    padding: 10px;
     border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Roboto', sans-serif;
 }
 .bottomModalContainer {
     position: relative;
@@ -236,6 +231,7 @@ h1, .stats-button, .splits-button {
 }
 .search-results table {
     font-size: 12px;
+    width: 100%;
 }
 .search-results td {
     border: 1px solid #000000;

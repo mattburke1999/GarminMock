@@ -150,6 +150,12 @@ class DataAccess:
         
         return session_info, lap_info, record_info
     
+    def get_record_by_activity_id(self, activity_id):
+        with self.connect_to_postgres() as cnxn:
+            query = 'select * from record_info(%s, null, null)'
+            record_info = pd.read_sql_query(query, cnxn, params=[activity_id])
+        return record_info
+    
     def get_calendar_info(self, year, month, accountid):
         with self.connect_to_postgres() as cnxn:
             query = 'select * from public.calendar_info(%s, %s)'

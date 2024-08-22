@@ -11,10 +11,10 @@ from sqlalchemy import create_engine
 import traceback
 
 def connect_to_postgres():
-        db_params = json.loads(os.environ.get('PostgreSQL_desktop'))
-        cnxn = psycopg2.connect(**db_params)
-        cnxn.autocommit = True
-        return cnxn
+    db_params = json.loads(os.environ.get('PostgreSQL_desktop'))
+    cnxn = psycopg2.connect(**db_params)
+    cnxn.autocommit = True
+    return cnxn
     
 def verify_activity_id(activity_id):
     cnxn = connect_to_postgres()
