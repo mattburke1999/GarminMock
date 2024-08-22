@@ -149,6 +149,12 @@ class DataAccess:
             record_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
         return session_info, lap_info, record_info
     
+    def get_session_by_activity_id(self, activity_id, accountid):
+        with self.connect_to_postgres() as cnxn:
+            query = 'select * from session_info(%s, null, null, null, %s)'
+            session_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
+        return session_info
+    
     def get_record_by_activity_id(self, activity_id, accountid):
         with self.connect_to_postgres() as cnxn:
             query = 'select * from record_info(%s, null, null, %s)'
@@ -166,3 +172,17 @@ class DataAccess:
             query = 'SELECT * from public.search_activity_by_date(%s, %s, %s)'
             df = pd.read_sql_query(query, cnxn, params=[date, title, accountid])
         return df
+    
+    def get_lap_columns(self):
+        with self.connect_to_postgres() as cnxn:
+            query = 'select * from raw_garmin_data_laps where 1=0'
+            df = pd.read_sql_query(query, cnxn)
+        return df.columns.tolist()
+    
+    def generate_new_activity_id(self):
+        with self.connect_to_postgres() as cnxn:
+            query = 'select max(activity_id) as max from public.session_info'
+            df = pd.read_sql_query(query, cnxn)
+        if len(df)==0 or df.iloc[0]['max'] is None:
+            return 1
+        return int(df.iloc[0]['max']) + 1
