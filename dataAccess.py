@@ -149,15 +149,21 @@ class DataAccess:
             record_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
         return session_info, lap_info, record_info
     
-    def get_session_by_activity_id(self, activity_id, accountid):
+    def get_raw_session_by_activity_id(self, activity_id, accountid):
         with self.connect_to_postgres() as cnxn:
-            query = 'select * from session_info(%s, null, null, null, %s)'
+            query = 'select * from raw_garmin_data_session where activity_id = %s and accountid = %s'
             session_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
         return session_info
     
-    def get_record_by_activity_id(self, activity_id, accountid):
+    def get_raw_lap_by_activity_id(self, activity_id, accountid):
         with self.connect_to_postgres() as cnxn:
-            query = 'select * from record_info(%s, null, null, %s)'
+            query = 'select * from raw_garmin_data_laps where activity_id = %s and accountid = %s order by message_index'
+            lap_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
+        return lap_info
+    
+    def get_raw_record_by_activity_id(self, activity_id, accountid):
+        with self.connect_to_postgres() as cnxn:
+            query = 'select * from raw_garmin_data_records where activity_id = %s and accountid = %s order by timestamp'
             record_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
         return record_info
     
@@ -181,7 +187,15 @@ class DataAccess:
     
     def generate_new_activity_id(self):
         with self.connect_to_postgres() as cnxn:
-            query = 'select max(activity_id) as max from public.session_info'
+            query = 'select max(activity_id) as max from session_info()'
+            df = pd.read_sql_query(query, cnxn)
+        if len(df)==0 or df.iloc[0]['max'] is None:
+            return 1
+        return int(df.iloc[0]['max']) + 1
+
+    def generate_new_temp_id(self):
+        with self.connect_to_postgres() as cnxn:
+            query = 'select max(temp_id) as max from raw_garmin_data_session'
             df = pd.read_sql_query(query, cnxn)
         if len(df)==0 or df.iloc[0]['max'] is None:
             return 1

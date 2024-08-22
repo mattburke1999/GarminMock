@@ -270,17 +270,20 @@ def merge_check_process(activity1, activity2):
     
 def merge_activities_process(activity1, activity2):
     try:
-        record1 = da.get_record_by_activity_id(activity1, session['accountid'])
-        session1 = da.get_session_by_activity_id(activity1, session['accountid'])
-        record2 = da.get_record_by_activity_id(activity2, session['accountid'])
-        lap_columns = da.get_lap_columns()
+        # this was made based off 2 running activities
+        # this might not work for other activities
+        # this definitely won't work for 2 activities with different sports
+        record1 = da.get_raw_record_by_activity_id(activity1, session['accountid'])
+        session1 = da.get_raw_session_by_activity_id(activity1, session['accountid'])
+        lap1 = da.get_raw_lap_by_activity_id(activity1, session['accountid'])
+        record2 = da.get_raw_record_by_activity_id(activity2, session['accountid'])
+        session2 = da.get_raw_session_by_activity_id(activity2, session['accountid'])
+        lap2 = da.get_raw_lap_by_activity_id(activity2, session['accountid'])
         new_activity_id = da.generate_new_activity_id()
-        new_record = dt.merge_records(record1, record2, new_activity_id)
-        lap_data = dt.records_to_laps(new_record, session1, lap_columns)
-        session_data = dt.records_to_sessions(new_record, session1) # wil need to write this method later
-        # TODO
-        # write dataTransform method to create new session data
-        # write dataAccess method to insert new session data, lap data, and record data
+        new_temp_id = da.generate_new_temp_id()
+        new_records = dt.merge_records(record1, record2, new_activity_id)
+        new_laps = dt.records_to_laps(new_records, session1, lap1, lap2, new_activity_id)
+        new_session = dt.laps_to_session(new_laps, new_records, session1, session2, new_activity_id, new_temp_id)
         result = 'I will finish this later'
         return (True, result)
     except Exception as e:

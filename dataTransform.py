@@ -116,7 +116,7 @@ class DataTransform:
         calendar = self.add_calendar_info(df, calendar)
         return calendar
     
-    def merge_records(self, records1, records2):
+    def merge_records(self, records1, records2, new_activity_id):
         # find timedelta between the last record of the first activity and the first record of the second activity
         time_diff = (records2['timestamp'].iloc[0] - records1['timestamp'].iloc[-1])
         # add this timedelta to the second activity to remove the gap
@@ -126,25 +126,41 @@ class DataTransform:
         records2['distance'] = records2['distance'] + max_dist1
 
         new_records = pd.concat([records1, records2], ignore_index=True)
+        new_records['activity_id'] = new_activity_id
         return new_records
     
-    def calculate_lap_data_from_records(self, records, start_distance, start_time, start_lat, start_long, lap_num=0, laps=[]):
+    def calculate_ascent_descent_for_lap(self, lap):
+        ascent = 0
+        descent = 0
+        for i in range(1, len(lap)):
+            diff = lap['enhanced_altitude'].iloc[i] - lap['enhanced_altitude'].iloc[i-1]
+            if diff > 0:
+                ascent += diff
+            else:
+                descent += abs(diff)
+        return ascent, descent
+    
+    def calculate_lap_data_from_records(self, records, start_distance, start_time, start_lat, start_long, cs_list, lap_num=0, laps=None):
+        if laps is None:
+            laps = []
         # start_distance = records['distance'].iloc[start_index]
         end_distance = start_distance + mile_dist
-        num_full_laps = int(records['distance'].iloc[-1]/mile_dist)
+        num_full_laps = records['distance'].iloc[-1]//mile_dist
         start_index = records['distance'].sub(start_distance).abs().idxmin()
         if end_distance < records['distance'].iloc[-1] and len(laps) < num_full_laps:
             end_index = records['distance'].sub(end_distance).abs().idxmin()
-            dist1 = records['distance'].iloc[end_index-1] - start_distance
-            dist2 = records['distance'].iloc[end_index] - start_distance
-            time1 = records['timestamp'].iloc[end_index - 1]
-            lat1 = records['position_lat'].iloc[end_index - 1]
-            long1 = records['position_long'].iloc[end_index - 1]
-            time2 = records['timestamp'].iloc[end_index]
-            lat2 = records['position_lat'].iloc[end_index]
-            long2 = records['position_long'].iloc[end_index]
+            
+            this_lap = records.iloc[start_index:end_index]
+            
+            dist1 = this_lap['distance'].iloc[-2] - start_distance
+            dist2 = this_lap['distance'].iloc[-1] - start_distance
+            time1 = this_lap['timestamp'].iloc[-2]
+            lat1 = this_lap['position_lat'].iloc[-2]
+            long1 = this_lap['position_long'].iloc[-2]
+            time2 = this_lap['timestamp'].iloc[-1]
+            lat2 = this_lap['position_lat'].iloc[-1]
+            long2 = this_lap['position_long'].iloc[-1]
 
-            # Calculate the exact time at which the distance was exactly 1609.75 meters
             # We use linear interpolation
             mile_time = time1 + (time2 - time1) * (mile_dist - dist1) / (dist2 - dist1)
             
@@ -153,42 +169,79 @@ class DataTransform:
             calc_long = long1 + (long2 - long1) * (mile_dist - dist1) / (dist2 - dist1)
             
             # calculate avg heart rate
-            avg_hr = records['heart_rate'].iloc[start_index:end_index].mean()
-            max_hr = records['heart_rate'].iloc[start_index:end_index].max()
+            avg_hr = this_lap['heart_rate'].mean()
+            max_hr = this_lap['heart_rate'].max()
             
             # calculate avg cadence
-            avg_cadence = records['cadence'].iloc[start_index:end_index].mean()
-            max_cadence = records['cadence'].iloc[start_index:end_index].max()
+            avg_cadence = this_lap['cadence'].mean()
+            max_cadence = this_lap['cadence'].max()
+            
+            # calculate max speed
+            max_speed = this_lap['enhanced_speed'].max()
+            
+            ascent, descent = self.calculate_ascent_descent_for_lap(this_lap)
 
             # Calculate the total mile time
             mile_duration = mile_time - start_time
-            laps.append((mile_duration.total_seconds(), start_time, mile_dist, start_lat, start_long, calc_lat, calc_long, avg_hr, max_hr, avg_cadence, max_cadence, lap_num))
-            return self.calculate_lap_data_from_records(records, end_distance, mile_time, calc_lat, calc_long, lap_num+1,laps)
+            laps.append((mile_duration.total_seconds(), start_time, mile_dist, start_lat, start_long, calc_lat, calc_long, avg_hr, max_hr, cs_list[lap_num][0], cs_list[lap_num][1], avg_cadence, max_cadence, max_speed, ascent, descent, lap_num))
+            return self.calculate_lap_data_from_records(records, end_distance, mile_time, calc_lat, calc_long, cs_list, lap_num+1, laps)
         else:
+            this_lap = records.iloc[start_index:]
             # get remainder time
-            mile_duration = records['timestamp'].iloc[-1] - start_time
-            partial_dist = records['distance'].iloc[-1] - start_distance
+            mile_duration = this_lap['timestamp'].iloc[-1] - start_time
+            partial_dist = this_lap['distance'].iloc[-1] - start_distance
             
-            avg_hr = records['heart_rate'].iloc[start_index:].mean()
-            max_hr = records['heart_rate'].iloc[start_index:].max()
-            avg_cadence = records['cadence'].iloc[start_index:].mean()
-            max_cadence = records['cadence'].iloc[start_index:].max()
+            avg_hr = this_lap['heart_rate'].mean()
+            max_hr = this_lap['heart_rate'].max()
+            avg_cadence = this_lap['cadence'].mean()
+            max_cadence = this_lap['cadence'].max()
+            max_speed = this_lap['enhanced_speed'].max()
             
-            laps.append((mile_duration.total_seconds(), start_time, partial_dist, start_lat, start_long, records['position_lat'].iloc[-1], records['position_long'].iloc[-1], avg_hr, max_hr, avg_cadence, max_cadence, lap_num))
+            ascent, descent = self.calculate_ascent_descent_for_lap(this_lap)
+            
+            laps.append((mile_duration.total_seconds(), start_time, partial_dist, start_lat, start_long, this_lap['position_lat'].iloc[-1], this_lap['position_long'].iloc[-1], avg_hr, max_hr, cs_list[lap_num][0], cs_list[lap_num][1], avg_cadence, max_cadence, max_speed, ascent, descent, lap_num))
             return laps
-        
-    def records_to_laps(self, new_record, session_data, lap_columns):
-        lap_data = self.calculate_lap_data_from_records(new_record, new_record['timestamp'].iloc[0], new_record['position_lat'].iloc[0], new_record['position_long'].iloc[0])
-        columns = ['total_timer_time', 'start_time', 'total_distance', 'start_position_lat', 'start_position_long', 'end_position_lat', 'end_position_long', 'avg_heart_rate', 'max_heart_rate', 'avg_running_cadence', 'max_running_cadence', 'message_index']
+    
+    def get_calories_strides_list(self, prev_distance, prev_calories, prev_strides, remaining_laps, cs_list=None):
+        if cs_list is None:
+            cs_list = []
+        if len(remaining_laps) == 0:
+            return cs_list
+        dist0 = float(remaining_laps[0][0])
+        cal0 = float(remaining_laps[0][1])
+        stride0 = float(remaining_laps[0][2])
+        if (dist0 + prev_distance) < mile_dist:
+            if len(remaining_laps) > 1:
+                return self.get_calories_strides_list(dist0+prev_distance, cal0+prev_calories, stride0+prev_calories, remaining_laps[1:], cs_list)
+            cs_list.append((cal0+prev_calories, stride0+prev_strides))
+            return cs_list
+        elif (dist0 + prev_distance) > mile_dist:
+            dist_remain = mile_dist - prev_distance
+            cals_to_add = (dist_remain / dist0)*cal0
+            strides_to_add = (dist_remain / dist0)*stride0
+            cs_list.append((cals_to_add+prev_calories, strides_to_add+prev_strides))
+            remaining_laps[0] = (dist0-dist_remain, cal0-cals_to_add, stride0-strides_to_add)
+            return self.get_calories_strides_list(0, 0, 0, remaining_laps, cs_list)
+        else:
+            cs_list.append((cal0+prev_calories, stride0+prev_strides))
+            return self.get_calories_strides_list(0, 0, 0, remaining_laps[1:], cs_list)
+    
+    def records_to_laps(self, new_record, session_data, lap1, lap2, new_activity_id):
+        lap1c = lap1[['total_distance', 'total_calories', 'total_strides']]
+        lap2c = lap2[['total_distance', 'total_calories', 'total_strides']]
+        lapc = pd.concat([lap1c, lap2c], ignore_index=True)
+        lap_t = [tuple(x) for x in lapc.to_numpy()]
+        calories_strides = self.get_calories_strides_list(0, 0, 0, lap_t)
+        lap_data = self.calculate_lap_data_from_records(new_record, new_record['distance'].iloc[0], new_record['timestamp'].iloc[0], new_record['position_lat'].iloc[0], new_record['position_long'].iloc[0], calories_strides)
+        columns = ['total_timer_time', 'start_time', 'total_distance', 'start_position_lat', 'start_position_long', 'end_position_lat', 'end_position_long', 'avg_heart_rate', 'max_heart_rate', 'total_calories', 'total_strides', 'avg_running_cadence', 'max_running_cadence', 'enhanced_max_speed', 'total_ascent', 'total_descent','message_index']
         lap_df = pd.DataFrame(lap_data, columns=columns)
-        lap_df['activity_id'] = session_data['activity_id'].iloc[0]
-        lap_df['account_id'] = session_data['account_id'].iloc[0]
-        # timestamp  = start_time(pd.datetime) + total_timer_time (seconds)
+        lap_df['activity_id'] = new_activity_id
+        lap_df['accountid'] = session_data['accountid'].iloc[0]
         lap_df['timestamp'] = lap_df['start_time'] + pd.to_timedelta(lap_df['total_timer_time'], unit='s')
         lap_df['total_elapsed_time'] = lap_df['total_timer_time']
         lap_df['sport'] = session_data['sport'].iloc[0]
         lap_df['sub_sport'] = session_data['sub_sport'].iloc[0]
-        for col in lap_columns:
+        for col in lap1.columns:
             if col not in lap_df.columns:
                 lap_df[col] = None
             elif col not in ('timestamp', 'start_time'):
@@ -197,3 +250,47 @@ class DataTransform:
                 lap_df[col] = pd.to_datetime(lap_df[col])
         return lap_df
     
+    def laps_to_session(self, new_laps, new_records, session1, session2, new_activity_id, new_temp_id):
+        new_session = {}
+        new_session['activity_id'] = new_activity_id
+        new_session['start_time'] = session1['start_time'].iloc[0]
+        new_session['timestamp'] = session2['timestamp'].iloc[0]
+        new_session['sport'] = session1['sport'].iloc[0]
+        new_session['sub_sport'] = session1['sub_sport'].iloc[0]
+        new_session['total_timer_time'] = str(float(session1['total_timer_time'].iloc[0] or 0) + float(session2['total_timer_time'].iloc[0] or 0))
+        new_session['total_elapsed_time'] = str(float(session1['total_elapsed_time'].iloc[0] or 0) + float(session2['total_elapsed_time'].iloc[0] or 0))
+        new_session['total_distance'] = str(float(session1['total_distance'].iloc[0] or 0) + float(session2['total_distance'].iloc[0] or 0))
+        new_session['total_cycles'] = str(float(session1['total_cycles'].iloc[0] or 0) + float(session2['total_cycles'].iloc[0] or 0))
+        new_session['total_calories'] = str(float(session1['total_calories'].iloc[0] or 0) + float(session2['total_calories'].iloc[0] or 0))
+        new_session['start_position_lat'] = session1['start_position_lat'].iloc[0]
+        new_session['start_position_long'] = session1['start_position_long'].iloc[0]
+        new_session['message_index'] = '0'
+        new_session['first_lap_index'] = '0'
+        new_session['num_laps'] = str(len(new_laps))
+        new_session['event'] = 'lap'
+        new_session['event_type'] = 'stop'
+        new_session['avg_heart_rate'] = str(new_records['heart_rate'].mean())
+        new_session['max_heart_rate'] = str(new_records['heart_rate'].max())
+        new_session['avg_running_cadence'] = str(new_records['cadence'].mean())
+        new_session['max_running_cadence'] = str(new_records['cadence'].max())
+        new_session['trigger'] = 'activity_end'
+        new_session['total_strides'] = str(float(session1['total_strides'].iloc[0] or 0) + float(session2['total_strides'].iloc[0] or 0))
+        new_session['total_ascent'] = str(new_laps['total_ascent'].sum())
+        new_session['total_descent'] = str(new_laps['total_descent'].sum())
+        new_session['unknown_196'] = str(float(session1['unknown_196'].iloc[0] or 0) + float(session2['unknown_196'].iloc[0] or 0)) # resting calories
+        new_session['unknown_178'] = str(float(session1['unknown_178'].iloc[0] or 0) + float(session2['unknown_178'].iloc[0] or 0)) # sweat loss
+        new_session['unknown_184'] = '0'
+        new_session['temp_id'] = str(new_temp_id)
+        new_session['activity_title'] = session1['activity_title'].iloc[0]
+        new_session['description'] = session1['description'].iloc[0]
+        new_session['accountid'] = session1['accountid'].iloc[0]
+        new_session['is_visible'] = True
+        new_session['is_merged'] = True
+        session_df = pd.DataFrame([new_session], index=[0])
+        for cols in session1.columns:
+            if cols not in session_df.columns:
+                if cols in ('description', 'activity_title'):
+                    session_df[cols] = ''
+                else:
+                    session_df[cols] = None
+        return session_df
