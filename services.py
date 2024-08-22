@@ -184,7 +184,7 @@ def month_detail(month, year):
     return (True, all_info)
     
 def get_single_activity_info(activity_id): 
-    session_info, lap_info, record_info = da.get_activity_by_id(activity_id)
+    session_info, lap_info, record_info = da.get_activity_by_id(activity_id, session['accountid'])
     if len(session_info) == 0:
         return (False, 'No activity found')
     all_info = prepare_all_info_threads(session_info, lap_info, record_info)
@@ -253,8 +253,6 @@ def search_for_editing(input, input_type):
     except Exception as e:
         return (False, str(e))
  
- 
-# {'activity_id': '11947108956', 'activity_title': 'Running Activity', 'description': '', 'start_time': '7/21/2024 2:02 pm', 'display_sport': 'Running', 'total_time': '47:51', 'total_distance': '7.01 mi.'}   
 def merge_check_process(activity1, activity2):
     try:
         date1 = pd.to_datetime(activity1['start_time']).date()
@@ -272,8 +270,8 @@ def merge_check_process(activity1, activity2):
     
 def merge_activities_process(activity1, activity2):
     try:
-        record1 = da.get_record_by_activity_id(activity1)
-        record2 = da.get_record_by_activity_id(activity2)
+        record1 = da.get_record_by_activity_id(activity1, session['accountid'])
+        record2 = da.get_record_by_activity_id(activity2, session['accountid'])
         new_record = dt.merge_records(record1, record2)
         lap_data = dt.calculate_lap_data_from_records(new_record, new_record['timestamp'].iloc[0], new_record['position_lat'].iloc[0], new_record['position_long'].iloc[0])
         lap_data = dt.finalize_lap_data(lap_data)

@@ -139,21 +139,20 @@ class DataAccess:
         cnxn.close()
         return
     
-    def get_activity_by_id(self, activity_id):
+    def get_activity_by_id(self, activity_id, accountid):
         with self.connect_to_postgres() as cnxn:
-            query = 'select * from session_info(%s, null, null, null)'
-            session_info = pd.read_sql_query(query, cnxn, params=[activity_id])
-            query = 'select * from lap_info(%s, null, null, null)'
-            lap_info = pd.read_sql_query(query, cnxn, params=[activity_id])
-            query = 'select * from record_info(%s, null, null)'
-            record_info = pd.read_sql_query(query, cnxn, params=[activity_id])
-        
+            query = 'select * from session_info(%s, null, null, null, %s)'
+            session_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
+            query = 'select * from lap_info(%s, null, null, null, %s)'
+            lap_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
+            query = 'select * from record_info(%s, null, null, %s)'
+            record_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
         return session_info, lap_info, record_info
     
-    def get_record_by_activity_id(self, activity_id):
+    def get_record_by_activity_id(self, activity_id, accountid):
         with self.connect_to_postgres() as cnxn:
-            query = 'select * from record_info(%s, null, null)'
-            record_info = pd.read_sql_query(query, cnxn, params=[activity_id])
+            query = 'select * from record_info(%s, null, null, %s)'
+            record_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
         return record_info
     
     def get_calendar_info(self, year, month, accountid):
