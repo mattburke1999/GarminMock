@@ -244,11 +244,13 @@ class DataTransform:
         for col in lap1.columns:
             if col not in lap_df.columns:
                 lap_df[col] = None
-            elif col not in ('timestamp', 'start_time'):
-                lap_df[col] = lap_df[col].astype(str)
-            else:
-                lap_df[col] = pd.to_datetime(lap_df[col])
         return lap_df
+    
+    def adjust_lap_columns(self, df):
+        for col in df.columns:
+            if col not in ('start_time', 'timestamp'):
+                df[col] = df[col].astype(str)
+        return df
     
     def laps_to_session(self, new_laps, new_records, session1, session2, new_activity_id, new_temp_id):
         new_session = {}

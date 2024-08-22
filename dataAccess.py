@@ -202,7 +202,7 @@ class DataAccess:
         return int(df.iloc[0]['max']) + 1
     
     def insert_dataframe(self, table_name, df, cnxn):
-        query = f'insert into {table_name} ({", ".join(df.columns)}) values ({", ".join(["%s" for i in range(len(df.columns))])})'
+        query = f'insert into raw_garmin_data_{table_name} ({", ".join(df.columns)}) values ({", ".join(["%s" for i in range(len(df.columns))])})'
         with cnxn.cursor() as cursor:
             for row in df.itertuples(index=False):
                 cursor.execute(query, row)
