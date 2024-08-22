@@ -200,3 +200,20 @@ class DataAccess:
         if len(df)==0 or df.iloc[0]['max'] is None:
             return 1
         return int(df.iloc[0]['max']) + 1
+    
+    def insert_dataframe(self, table_name, df, cnxn):
+        query = f'insert into {table_name} ({", ".join(df.columns)}) values ({", ".join(["%s" for i in range(len(df.columns))])})'
+        with cnxn.cursor() as cursor:
+            for row in df.itertuples(index=False):
+                cursor.execute(query, row)
+        return
+    
+    def mark_session_as_invisible(self, activity_id, cnxn):
+        with cnxn.cursor() as cursor:
+            cursor.execute('''
+                update raw_garmin_data_session
+                set is_visible = false
+                where activity_id = %s
+            ''', (activity_id,))
+        return
+                

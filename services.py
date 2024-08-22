@@ -284,7 +284,13 @@ def merge_activities_process(activity1, activity2):
         new_records = dt.merge_records(record1, record2, new_activity_id)
         new_laps = dt.records_to_laps(new_records, session1, lap1, lap2, new_activity_id)
         new_session = dt.laps_to_session(new_laps, new_records, session1, session2, new_activity_id, new_temp_id)
-        result = 'I will finish this later'
-        return (True, result)
+        with da.connect_to_postgres() as cnxn:
+            da.insert_dataframe('session', new_session, cnxn)
+            da.insert_dataframe('laps', new_laps, cnxn)
+            da.insert_dataframe('records', new_records, cnxn)
+            da.mark_session_as_invisible(activity1, cnxn)
+            da.mark_session_as_invisible(activity2, cnxn)
+            cnxn.commit()
+        return (True, '')
     except Exception as e:
         return (False, str(e))
