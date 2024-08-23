@@ -14,5 +14,10 @@ class Config:
 class ProdConfig(Config):
     Debug = False
     
-class DevConfig(Config):
+class DesktopConfig(Config):
     Debug = True
+    PG_DESKTOP = os.environ.get('PostgreSQL_desktop')
+    
+class LaptopConfig(Config):
+    Debug = True
+    PG_DESKTOP = os.environ.get('PostgreSQL_local')

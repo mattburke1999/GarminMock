@@ -5,15 +5,17 @@ load_dotenv(override=True)
 import warnings
 warnings.filterwarnings("ignore")
 
-from config import ProdConfig, DevConfig, FLASK_ENV, SECRET_KEY
+from config import ProdConfig, DesktopConfig, LaptopConfig, FLASK_ENV, SECRET_KEY
 
 app = Flask(__name__)
 app.register_blueprint(bp)
 
 app.secret_key = SECRET_KEY
 
-if FLASK_ENV == 'development':
-    app.config.from_object(DevConfig)
+if FLASK_ENV == 'desktop':
+    app.config.from_object(DesktopConfig)
+elif FLASK_ENV == 'laptop':
+    app.config.from_object(LaptopConfig)
 else:
     app.config.from_object(ProdConfig)
 
