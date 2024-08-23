@@ -6,7 +6,7 @@
 -- not necessary, if not enabling a backlog in the DB
 CREATE TABLE IF NOT EXISTS public.backlog_categories
 (
-    id integer NOT NULL DEFAULT nextval('backlog_categories_id_seq'::regclass),
+    id serial,
     name text COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT backlog_categories_pkey PRIMARY KEY (id),
     CONSTRAINT backlog_categories_name_key UNIQUE (name)
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS public.backlog_categories
 
 CREATE TABLE IF NOT EXISTS public.backlog_groups
 (
-    id integer NOT NULL DEFAULT nextval('backlog_groups_id_seq'::regclass),
+    id serial,
     name text COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT backlog_groups_pkey PRIMARY KEY (id),
     CONSTRAINT backlog_groups_name_key UNIQUE (name)
@@ -127,7 +127,7 @@ CREATE TABLE IF NOT EXISTS public.raw_garmin_data_session
 
 CREATE TABLE IF NOT EXISTS public.merged_activities
 (
-    id integer NOT NULL DEFAULT nextval('merged_activities_id_seq'::regclass),
+    id serial,
     merged_activity_id text COLLATE pg_catalog."default",
     activity1_id text COLLATE pg_catalog."default",
     activity2_id text COLLATE pg_catalog."default",
