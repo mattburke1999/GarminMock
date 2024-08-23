@@ -6,7 +6,6 @@ function toggleCollapse(className, button, buttonText) {
     for (var i = 0; i < elements.length; i++) {
         if (elements[i].style.display === "none") {
             if (buttonText === ' Stats') {
-                console.log(buttonText)
                 elements[i].style.display = "grid";
             } else {
                 elements[i].style.display = "block";
@@ -35,9 +34,12 @@ function navigateToActivity(index) {
 
 let offset = 15;
         
-$(window).scroll(function(loadMoreEnabled) {
-    if (loadMoreEnabled && ($(window).scrollTop() + $(window).height() >= $(document).height() - 100)) {
-        loadMoreItems();
+$(window).scroll(function() {
+    if (loadMoreEnabled) {
+        if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
+                loadMoreItems();
+                return;
+        }
     }
 });
 
@@ -45,7 +47,6 @@ function setHighlightButton(sport) {
     let filterContainer = document.getElementById('filter-button-container');
     let buttons = Array.from(filterContainer.getElementsByTagName('button'));
     // remove s from class name of button if it exists
-    console.log(buttons);
     buttons.forEach(b => {
         b.className = b.className.replace(' s', '');
     });
@@ -98,7 +99,6 @@ function loadMoreItems() {
             sport: sportFilter
         },
         success: function(data) {
-            console.log(data);
             if (data.length > 0) {
                 data[1].forEach(itemHtml => {
                     $('#posts-container').append(itemHtml);
