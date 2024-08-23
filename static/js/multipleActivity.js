@@ -1,13 +1,4 @@
-let sportFilter = localStorage.getItem('sportFilter');
-
-// on page load, filter posts by sport if sportFilter is set
-window.onload = function() {
-    console.log(performance.getEntriesByType("navigation")[0].type);
-    if (sportFilter) {
-        console.log(sportFilter);
-        filterPosts(sportFilter, pageload = true);
-    }
-}
+let sportFilter = undefined;
 
 function toggleCollapse(className, button, buttonText) {
     var container = button.parentElement;
@@ -66,14 +57,12 @@ function setHighlightButton(sport) {
     
 }
 
-function filterPosts(sport, pageload=false) {
-    if (sport === sportFilter && !pageload) {
+function filterPosts(sport) {
+    if (sport === sportFilter) {
         sportFilter = undefined;
-        localStorage.removeItem('sportFilter');
     }
     else {
         sportFilter = sport;
-        localStorage.setItem('sportFilter', sport);
     }
     $('#posts-container').html('');
     $('#loading').show();
