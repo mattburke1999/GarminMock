@@ -1,45 +1,13 @@
 {% extends 'base.html' %}
         {% block title %}Activities{% endblock %}
         {% block head %}
+            <script src="{{ url_for('static', filename='js/multipleActivity.js') }}"></script>
             <script>
                 const activities = {{ activity_list|tojson }};
                 const lap_htmls = {{lap_html_list|tojson}};
                 const maps = {{folium_maps|tojson}};
 
-                var sportFilter = undefined;
-
-                function toggleCollapse(className, button, buttonText) {
-                    var container = button.parentElement;
-                    var elements = container.querySelectorAll('.' + className);
-                    for (var i = 0; i < elements.length; i++) {
-                        if (elements[i].style.display === "none") {
-                            if (buttonText === ' Stats') {
-                                console.log(buttonText)
-                                elements[i].style.display = "grid";
-                            } else {
-                                elements[i].style.display = "block";
-                            }
-                            button.innerHTML = "Hide";
-                            button.style.marginBottom = "10px"
-                        } else {
-                            elements[i].style.display = "none";
-                            button.innerHTML = "View " + buttonText;
-                            button.style.marginBottom = "0px"
-                        }
-                    }
-                }
-
-                function navigateToActivity(index) {
-                    activity = activities[index];
-                    lap_html = lap_htmls[index];
-                    folium_map = maps[index];
-
-                    document.getElementById('activity-input').value = JSON.stringify(activity);
-                    document.getElementById('lap-input').value = lap_html;
-                    document.getElementById('map-input').value = folium_map;
-
-                    document.getElementById('activity-form').submit();
-                }
+                let loadMoreEnabled = '{{enable_load_more}}' === 'True';
             </script>
         {% endblock %}
 {% block body %}
@@ -52,98 +20,18 @@
     {% if date_title %}
         <h1 class ='pageTitle'>Activities for {{date_title}}</h1>
     {% endif %}
-    <div class="filters" id='filter-button-container'>
-        <button class="filter-button" onclick="filterPosts('Running', this)">Running</button>
-        <button class="filter-button" onclick="filterPosts('Cycling', this)">Cycling</button>
-        <button class="filter-button" onclick="filterPosts('Rowing', this)">Rowing</button>
-        <button class="filter-button" onclick="filterPosts('Other', this)">Other</button>
-    </div>
+    {% if enable_load_more %}
+        <div class="filters" id='filter-button-container'>
+            <button id='Running_filter' class="filter-button" onclick="filterPosts('Running')">Running</button>
+            <button id='Cycling_filter' class="filter-button" onclick="filterPosts('Cycling')">Cycling</button>
+            <button id='Rowing_filter' class="filter-button" onclick="filterPosts('Rowing')">Rowing</button>
+            <button id='Other_filter' class="filter-button" onclick="filterPosts('Other')">Other</button>
+        </div>
+    {% endif %}
     <div id='posts-container'>
         {% for activity, lap_html, folium_map, i in zip(activity_list, lap_html_list, folium_maps, list(range(len(activity_list)))) %}
             {% include "_activity.html" with context %}
         {% endfor %}
     </div>    
     <div id="loading" class='loading' style="display: none;">Loading...</div>
-    {% if enable_load_more %}
-        <script>
-            let offset = 15;
-        
-            $(window).scroll(function() {
-                if ($(window).scrollTop() + $(window).height() >= $(document).height() - 100) {
-                    loadMoreItems();
-                }
-            });
-
-            function setHighlightButton(button) {
-                filterContainer = document.getElementById('filter-button-container');
-                buttons = Array.from(filterContainer.getElementsByTagName('button'));
-                // remove s from class name of button if it exists
-                console.log(buttons);
-                buttons.forEach(b => {
-                    b.className = b.className.replace(' s', '');
-                });
-                if(button) {
-                    button.className += ' s';
-                }
-                // if button is undefined(ie they clicked the already highlighted button), then no button should be highlighted
-                return;
-                
-            }
-
-            function filterPosts(sport, button) {
-                if (sport === sportFilter) {
-                    sportFilter = undefined;
-                    button = undefined;
-                }
-                else {
-                    sportFilter = sport;
-                }
-                setHighlightButton(button);
-                $.ajax({
-                    url: '/filter_posts',
-                    type: 'GET',
-                    data: {
-                        sport: sportFilter
-                    },
-                    success: function(data) {
-                        $('#posts-container').html(data[1]);
-                        offset = 15;
-                    },
-                    error: function() {
-                        console.error('Error filtering posts');
-                    }
-                });
-            }
-
-            function loadMoreItems() {
-                if ($('#loading').is(':visible')) return;
-
-                $('#loading').show();
-
-                $.ajax({
-                    url: '/load_more',
-                    type: 'GET',
-                    data: {
-                        offset: offset,
-                        sport: sportFilter
-                    },
-                    success: function(data) {
-                        console.log(data);
-                        if (data.length > 0) {
-                            data[1].forEach(itemHtml => {
-                                $('#posts-container').append(itemHtml);
-                            });
-                            offset += 10;
-                        }
-                        $('#loading').hide();
-                    },
-                    error: function() {
-                        console.error('Error loading more items');
-                        $('#loading').hide();
-                    }
-                });
-            }
-
-        </script>
-    {% endif %}
 {% endblock %}
