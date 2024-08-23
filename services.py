@@ -1,25 +1,22 @@
-from config import Config as environ
 import calendar
 from dataAccess import DataAccess
 from dataTransform import DataTransform
 import smtplib
-from flask import session
+from flask import session, current_app, render_template
 from threading import Thread
 import redis
 from queue import Queue
-from flask import render_template
 import pandas as pd
 from numpy import array_split
 
 calendar.setfirstweekday(calendar.SUNDAY)
 # redis_cnxn = redis.Redis(host='localhost', port=6379, db=0, password = environ.REDIS_PASSWORD)
-da = DataAccess()
-    # redis_cnxn)
+
 dt = DataTransform()
 
 def send_registration_email(email, firstname, lastname):
-    gmail_user = environ.GMAIL_USER
-    gmail_password = environ.GMAIL_PASSWORD
+    gmail_user = current_app.config.get('GMAIL_USER')
+    gmail_password = current_app.config.get('GMAIL_PASSWORD')
     server = smtplib.SMTP('smtp.gmail.com', 587)
     server.starttls()  # Upgrade the connection to secure
     server.login(gmail_user, gmail_password)
@@ -40,6 +37,7 @@ def send_registration_email(email, firstname, lastname):
 
 def register_user(firstname, lastname, username, password, result_queue):
     try:
+        da = DataAccess(current_app.config)
         da.register_user(firstname, lastname, username, password)
         result_queue.put((True, ''))
     except Exception as e:
@@ -62,6 +60,7 @@ def register_process(firstname, lastname, email, username, password):
     return success, error
 
 def login_process(username, password):
+    da = DataAccess(current_app.config)
     account_id = da.verify_user(username, password)
     if account_id is not None:
         session['logged_in'] = True
@@ -160,6 +159,7 @@ def prepare_all_info_threads(session_df, lap_df, record_info, desc_order=False):
     return return_dict
     
 def single_date(date_str):
+    da = DataAccess(current_app.config)
     session_df, lap_df, record_df = da.get_activity_info_by_date(pd.to_datetime(date_str).date(), session['accountid'])
     if len(session_df) == 0:
         print("NO ACTIVITY FOUND")
@@ -173,6 +173,7 @@ def single_date(date_str):
 def month_detail(month, year):
     start_date = pd.Timestamp(f'{year}-{month}-01')
     end_date = pd.Timestamp(f'{year}-{month}-01') + pd.offsets.MonthEnd(0)
+    da = DataAccess(current_app.config)
     session_df, lap_df, record_df = da.get_activity_info_by_date_range(start_date.date(), end_date.date(), session['accountid'])
     if len(session_df)==0:
         print("NO ACTIVITY FOUND")
@@ -184,6 +185,7 @@ def month_detail(month, year):
     return (True, all_info)
     
 def get_single_activity_info(activity_id): 
+    da = DataAccess(current_app.config)
     session_info, lap_info, record_info = da.get_activity_by_id(activity_id, session['accountid'])
     if len(session_info) == 0:
         return (False, 'No activity found')
@@ -198,6 +200,7 @@ def prepare_rendered_info(all_info):
     return templates
 
 def get_home_page_posts(offset, limit, sport, render=False):
+    da = DataAccess(current_app.config)
     session_df, lap_df, record_df = da.get_recent_posts(session['accountid'], offset, limit, sport)
     if len(session_df) == 0:
         return (False, 'No activities found')
@@ -227,6 +230,7 @@ def get_month_dates(month, year):
 
 def get_calendar_info():
     try: 
+        da = DataAccess(current_app.config)
         month = session.get('month', 0)
         session['month'] = 0
         year = session.get('year', 0)
@@ -247,6 +251,7 @@ def search_for_editing(input, input_type):
     date = input if input_type == 'date' else None
     title = input if input_type == 'title' else None
     try:
+        da = DataAccess(current_app.config)
         search_results = da.search_activities_for_editing(date, title, session['accountid'])
         search_results['total_time'] = search_results['total_time'].apply(lambda x: dt.time_seconds_to_string(x))
         return (True, search_results.to_dict(orient='records'))
@@ -270,6 +275,7 @@ def merge_check_process(activity1, activity2):
     
 def reactivate_merged_activity(merged_activity_id, activity1_id, activity2_id):
     try:
+        da = DataAccess(current_app.config)
         with da.connect_to_postgres() as cnxn:
             da.mark_activity_as_invisible(activity1_id, cnxn)
             da.mark_activity_as_invisible(activity2_id, cnxn)
@@ -284,6 +290,7 @@ def merge_activities_process(activity1_id, activity2_id):
         # this was made based off 2 running activities
         # this might not work for other activities
         # this definitely won't work for 2 activities with different sports
+        da = DataAccess(current_app.config)
         merged_activity_id = da.get_merge_activity_by_activity_ids(activity1_id, activity2_id)
         if merged_activity_id is not None:
             # if the activites were previously merged, and reversed back to normal, we have the merged actvity saved still
@@ -316,6 +323,7 @@ def check_unmerge_process(merged_activity_id):
     # TODO: check if merged activity has been edited since it was merged
     # if it has, send a warning that the activities will be returned to the state they were in before they were merged
     try:
+        da = DataAccess(current_app.config)
         merge_id = da.get_merge_id_by_merged_activity_id(merged_activity_id)
         return (True, (merge_id, '')) if merge_id is not None else (False, 'No merged activity found')
     except Exception as e:
@@ -323,6 +331,7 @@ def check_unmerge_process(merged_activity_id):
     
 def reverse_merge(merge_id):
     try:
+        da = DataAccess(current_app.config)
         merged_activity_id, activity1, activity2 = da.get_merge_activity_by_merge_id(merge_id)
         with da.connect_to_postgres() as cnxn:
             da.mark_activity_as_visible(activity1, cnxn)

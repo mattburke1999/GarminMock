@@ -10,6 +10,7 @@ class Config:
     REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD')
     GMAIL_USER = os.environ.get('gmail_user')
     GMAIL_PASSWORD = os.environ.get('gmail_password')
+    FLASK_ENV = FLASK_ENV
     
 class ProdConfig(Config):
     Debug = False

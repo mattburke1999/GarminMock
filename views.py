@@ -1,5 +1,4 @@
-from flask import render_template, redirect, url_for, session, request, jsonify, make_response
-from config import FLASK_ENV
+from flask import render_template, redirect, url_for, session, request, jsonify, make_response, current_app
 from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info
 from services import get_home_page_posts, search_for_editing, merge_check_process, merge_activities_process, check_unmerge_process, reverse_merge
 from functools import wraps
@@ -50,7 +49,7 @@ def show_searchByMonth_form():
     return render_template('searchByMonth.html')
 
 def show_error_page(error, service_method, prod_error):
-    if FLASK_ENV == 'production':
+    if current_app.config.get('FLASK_ENV') == 'production':
         service_method = None
         error = prod_error
         prod_error = None

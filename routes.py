@@ -1,9 +1,8 @@
-from flask import Blueprint, request, flash
+from flask import Blueprint, request
 from views import show_register, register, login, check_login, home, homePage, show_login_form,\
     show_searchByDate_form, searchByDate, show_searchByMonth_form, searchByMonth,display_activity,\
     show_searchByYear_form, default, logout, activity, get_calendar, switch_month, searchPage, get_more_posts, \
     show_edit_form, search_activities_for_editing, merge_check, merge_activities, unmerge_check, unmerge_activity
-
 
 bp = Blueprint('main', __name__)
 
