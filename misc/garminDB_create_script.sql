@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS public.merged_activities
     CONSTRAINT merged_activities_merged_activity_id_fkey FOREIGN KEY (merged_activity_id)
         REFERENCES public.raw_garmin_data_session (activity_id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION
+        ON DELETE NO ACTION -- TODO: add a trigger to delete the record from this table, and mark activity1 and activity2 as visible
 );
 
 CREATE TABLE IF NOT EXISTS public.raw_garmin_data_laps
