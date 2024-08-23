@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, session, request, jsonify,
 from config import FLASK_ENV
 from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info, get_home_page_posts, search_for_editing, merge_check_process
 from functools import wraps
-import ast
+import json
 
 def show_register():
     return render_template('registration.html')
@@ -82,7 +82,7 @@ def activity(activity_id):
 
 def display_activity(activity, lap_html, folium_map):
     if type(activity) == str:
-        activity = ast.literal_eval(activity)
+        activity = json.loads(activity)
     return render_template('singleActivity.html', activity=activity, lap_html=lap_html, folium_map=folium_map)
     
 def get_calendar():
