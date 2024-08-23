@@ -599,8 +599,11 @@ a {
     padding-bottom: 20px;
 }
 
-#posts-container {
+.posts-container-filter {
     margin-top: 15px;
+}
+.posts-container {
+    margin-top: 100px;
 }
 .filters{
     display: flex;

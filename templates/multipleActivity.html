@@ -12,7 +12,7 @@
             </script>
         {% endblock %}
 {% block body %}
-    <form action = '/activity' method = 'POST' id="activity-form">
+    <form action = '/activity' method = 'POST' id="activity-form" hidden>
         <input type = 'hidden' name = 'activity' id = 'activity-input'>
         <input type = 'hidden' name = 'lap_html' id = 'lap-input'>
         <input type = 'hidden' name = 'folium_map' id = 'map-input'>
@@ -29,7 +29,7 @@
             <button id='Other_filter' class="filter-button" onclick="filterPosts('Other')">Other</button>
         </div>
     {% endif %}
-    <div id='posts-container'>
+    <div id='posts-container' class='{{"posts-container-filter" if enable_load_more else "posts-container"}}'>
         {% for activity, lap_html, folium_map, i in zip(activity_list, lap_html_list, folium_maps, list(range(len(activity_list)))) %}
             {% include "_activity.html" with context %}
         {% endfor %}
