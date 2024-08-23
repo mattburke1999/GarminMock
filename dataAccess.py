@@ -207,8 +207,32 @@ class DataAccess:
             for row in df.itertuples(index=False):
                 cursor.execute(query, row)
         return
+
+    def insert_merge_activity_history(self, merged_activity_id, activity1_id, activity2_id, cnxn):
+        with cnxn.cursor() as cursor:
+            cursor.execute('''
+                insert into merged_activities(merged_activity_id, activity1_id, activity2_id, merge_date)
+                values (%s, %s, %s, current_timestamp)
+            ''', (merged_activity_id, activity1_id, activity2_id))
+        return
     
-    def mark_session_as_invisible(self, activity_id, cnxn):
+    def get_merge_activity_by_merged_activity_id(self, merge_activity_id):
+        with self.connect_to_postgres() as cnxn:
+            with cnxn.cursor() as cursor:
+                cursor.execute('select activity1_id, activity2_id from merged_activities where merged_activity_id = %s', 
+                    (merge_activity_id,))
+                results = cursor.fetchone()
+        return results
+    
+    def get_merge_activity_by_activity_ids(self, activity1_id, activity2_id):
+        with self.connect_to_postgres() as cnxn:
+            with cnxn.cursor() as cursor:
+                cursor.execute('select merged_activity_id from merged_activities where activity1_id = %s and activity2_id = %s', 
+                    (activity1_id, activity2_id))
+                results = cursor.fetchone()
+        return results
+    
+    def mark_activity_as_invisible(self, activity_id, cnxn):
         with cnxn.cursor() as cursor:
             cursor.execute('''
                 update raw_garmin_data_session
@@ -216,4 +240,12 @@ class DataAccess:
                 where activity_id = %s
             ''', (activity_id,))
         return
+    
+    def mark_activity_as_visible(self, activity_id, cnxn):
+        with cnxn.cursor() as cursor:
+            cursor.execute('''
+                update raw_garmin_data_session
+                set is_visible = true
+                where activity_id = %s
+            ''', (activity_id,))
                 

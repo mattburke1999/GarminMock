@@ -268,17 +268,32 @@ def merge_check_process(activity1, activity2):
     except Exception as e:
         return (False, str(e))
     
-def merge_activities_process(activity1, activity2):
+def reactivate_merged_activity(merged_activity_id, activity1_id, activity2_id):
+    try:
+        with da.connect_to_postgres() as cnxn:
+            da.mark_activity_as_invisible(activity1_id, cnxn)
+            da.mark_activity_as_invisible(activity2_id, cnxn)
+            da.mark_activity_as_visible(merged_activity_id, cnxn)
+            cnxn.commit()
+        return (True, '')
+    except Exception as e:
+        return (False, str(e))
+    
+def merge_activities_process(activity1_id, activity2_id):
     try:
         # this was made based off 2 running activities
         # this might not work for other activities
         # this definitely won't work for 2 activities with different sports
-        record1 = da.get_raw_record_by_activity_id(activity1, session['accountid'])
-        session1 = da.get_raw_session_by_activity_id(activity1, session['accountid'])
-        lap1 = da.get_raw_lap_by_activity_id(activity1, session['accountid'])
-        record2 = da.get_raw_record_by_activity_id(activity2, session['accountid'])
-        session2 = da.get_raw_session_by_activity_id(activity2, session['accountid'])
-        lap2 = da.get_raw_lap_by_activity_id(activity2, session['accountid'])
+        merged_activity_id = da.get_merge_activity_by_activity_ids(activity1_id, activity2_id)
+        if merged_activity_id is not None:
+            # if the activites were previously merged, and reversed back to normal, we have the merged actvity saved still
+            return reactivate_merged_activity(merged_activity_id, activity1_id, activity2_id)
+        record1 = da.get_raw_record_by_activity_id(activity1_id, session['accountid'])
+        session1 = da.get_raw_session_by_activity_id(activity1_id, session['accountid'])
+        lap1 = da.get_raw_lap_by_activity_id(activity1_id, session['accountid'])
+        record2 = da.get_raw_record_by_activity_id(activity2_id, session['accountid'])
+        session2 = da.get_raw_session_by_activity_id(activity2_id, session['accountid'])
+        lap2 = da.get_raw_lap_by_activity_id(activity2_id, session['accountid'])
         new_activity_id = da.generate_new_activity_id()
         new_temp_id = da.generate_new_temp_id()
         new_records = dt.merge_records(record1, record2, new_activity_id)
@@ -289,8 +304,21 @@ def merge_activities_process(activity1, activity2):
             da.insert_dataframe('session', new_session, cnxn)
             da.insert_dataframe('laps', new_laps, cnxn)
             da.insert_dataframe('records', new_records, cnxn)
-            da.mark_session_as_invisible(activity1, cnxn)
-            da.mark_session_as_invisible(activity2, cnxn)
+            da.insert_merge_activity_history(new_activity_id, activity1_id, activity2_id, cnxn)
+            da.mark_activity_as_invisible(activity1_id, cnxn)
+            da.mark_activity_as_invisible(activity2_id, cnxn)
+            cnxn.commit()
+        return (True, '')
+    except Exception as e:
+        return (False, str(e))
+    
+def reverse_merge(merged_activity_id):
+    try:
+        activity1, activity2 = da.get_merge_activity_by_merged_activity_id(merged_activity_id)
+        with da.connect_to_postgres() as cnxn:
+            da.mark_activity_as_visible(activity1, cnxn)
+            da.mark_activity_as_visible(activity2, cnxn)
+            da.mark_activity_as_invisible(merged_activity_id, cnxn)
             cnxn.commit()
         return (True, '')
     except Exception as e:
