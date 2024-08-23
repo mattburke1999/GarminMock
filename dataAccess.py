@@ -216,13 +216,21 @@ class DataAccess:
             ''', (merged_activity_id, activity1_id, activity2_id))
         return
     
-    def get_merge_activity_by_merged_activity_id(self, merge_activity_id):
+    def get_merge_activity_by_merge_id(self, merge_id):
         with self.connect_to_postgres() as cnxn:
             with cnxn.cursor() as cursor:
-                cursor.execute('select activity1_id, activity2_id from merged_activities where merged_activity_id = %s', 
-                    (merge_activity_id,))
+                cursor.execute('select merged_activity_id, activity1_id, activity2_id from merged_activities where id = %s', 
+                    (merge_id,))
                 results = cursor.fetchone()
         return results
+    
+    def get_merge_id_by_merged_activity_id(self, merge_activity_id):
+        with self.connect_to_postgres() as cnxn:
+            with cnxn.cursor() as cursor:
+                cursor.execute('select id from merged_activities where merged_activity_id = %s', 
+                    (merge_activity_id,))
+                results = cursor.fetchone()
+        return results[0] if results else None
     
     def get_merge_activity_by_activity_ids(self, activity1_id, activity2_id):
         with self.connect_to_postgres() as cnxn:

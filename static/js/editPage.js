@@ -283,7 +283,7 @@ function displayMergeConfirmation(confirm_data) {
     }
     console.log('display')
     modal.style.display = 'flex';
-    document.body.classList.add('hidden');
+    document.body.classList.add('no-scroll'); // prevents scrolling
 }
 
 function merge_check() {
@@ -308,7 +308,7 @@ function merge_check() {
             }
         },
         error: function(response) {
-            console.log('error');
+            console.log(response.error);
             alert('Error merging activities');
         }
     });
@@ -329,7 +329,8 @@ function merge_activities() {
             closeMergeActivities();
         },
         error: function(response) {
-            console.log('error');
+            console.log(response.error);
+            closeMergeActivities();
             alert('Error merging activities');
         }
     });

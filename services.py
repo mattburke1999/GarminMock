@@ -312,9 +312,18 @@ def merge_activities_process(activity1_id, activity2_id):
     except Exception as e:
         return (False, str(e))
     
-def reverse_merge(merged_activity_id):
+def check_unmerge_process(merged_activity_id):
+    # TODO: check if merged activity has been edited since it was merged
+    # if it has, send a warning that the activities will be returned to the state they were in before they were merged
     try:
-        activity1, activity2 = da.get_merge_activity_by_merged_activity_id(merged_activity_id)
+        merge_id = da.get_merge_id_by_merged_activity_id(merged_activity_id)
+        return (True, (merge_id, '')) if merge_id is not None else (False, 'No merged activity found')
+    except Exception as e:
+        return (False, str(e))
+    
+def reverse_merge(merge_id):
+    try:
+        merged_activity_id, activity1, activity2 = da.get_merge_activity_by_merge_id(merge_id)
         with da.connect_to_postgres() as cnxn:
             da.mark_activity_as_visible(activity1, cnxn)
             da.mark_activity_as_visible(activity2, cnxn)

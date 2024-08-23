@@ -1,6 +1,9 @@
 <div class="containerMult">
     <div class='header'>
         <div class='topHeader'>
+            {% if activity['is_merged'] %}
+                <button class='unmerge-btn' onclick='unmergeActivity({{i}})'>Unmerge Activity</button>
+            {% endif %}
             {% if activity['sport'] == 'Running' %}
                 <img src="../static/images/running-icon.jpg" alt="Running icon">
             {% elif activity['sport'] == 'Cycling' %}

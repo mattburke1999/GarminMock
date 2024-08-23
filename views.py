@@ -1,6 +1,7 @@
 from flask import render_template, redirect, url_for, session, request, jsonify, make_response
 from config import FLASK_ENV
-from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info, get_home_page_posts, search_for_editing, merge_check_process
+from services import register_process, login_process, single_date, month_detail, get_single_activity_info, get_calendar_info
+from services import get_home_page_posts, search_for_editing, merge_check_process, merge_activities_process, check_unmerge_process, reverse_merge
 from functools import wraps
 import json
 
@@ -118,9 +119,24 @@ def search_activities_for_editing(input, input_type):
 
 def merge_check(activity1, activity2):
     result = merge_check_process(activity1, activity2)
-    if result[0]:
-        return make_response(jsonify({'data': result[1]}), 200)
-    return make_response(jsonify({'error': result[1]}), 400)
+    if not result[0]:
+        return make_response(jsonify({'error': result[1]}), 400)
+    return make_response(jsonify({'data': result[1]}), 200)
 
 def merge_activities(activity1, activity2):
-    pass
+    result = merge_activities_process(activity1, activity2)
+    if not result[0]:
+        return make_response(jsonify({'error': result[1]}), 400)
+    return make_response(jsonify({'success': ''}), 200)
+
+def unmerge_check(merged_activity_id):
+    result = check_unmerge_process(merged_activity_id)
+    if not result[0]:
+        return make_response(jsonify({'error': result[1]}), 400)
+    return make_response(jsonify({'data': result[1]}), 200)
+
+def unmerge_activity(merge_id):
+    result = reverse_merge(merge_id)
+    if not result[0]:
+        return make_response(jsonify({'error': result[1]}), 400)
+    return make_response(jsonify({'data': result[1]}), 200)
