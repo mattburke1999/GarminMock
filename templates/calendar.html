@@ -15,18 +15,18 @@
     <div class = "calendar">
         <table>
             <tr>
-                <th class='name'>Sun</th>
-                <th class='name'>Mon</th>
-                <th class='name'>Tue</th>
-                <th class='name'>Wed</th>
-                <th class='name'>Thu</th>
-                <th class='name'>Fri</th>
-                <th class='name'>Sat</th>
+                <th class='day-name'>Sun</th>
+                <th class='day-name'>Mon</th>
+                <th class='day-name'>Tue</th>
+                <th class='day-name'>Wed</th>
+                <th class='day-name'>Thu</th>
+                <th class='day-name'>Fri</th>
+                <th class='day-name'>Sat</th>
             </tr>
             {% for week in calendar %}
             <tr>
                 {% for (day, activities) in week %}
-                <td>
+                <td class='date-cell'>
                     <h3 class='day'>{{ day }}</h3>
                     {% for activity in activities %}
                         <a class = "activity_link" href="{{url_for('main.activity_route', activity_id=activity['activity_id'])}}">

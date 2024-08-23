@@ -21,6 +21,14 @@ td, th {
     border: 2px solid #000; /* adjust as needed */
     border-radius: 10px;
 }
+.date-cell {
+    width: 13.5%;
+}
+.day-name {
+    font-size: 25px;
+    font-weight: bold;
+    color: #292E2F;
+}
 .day {
     position: absolute;
     top: 7px; /* adjust as needed */
