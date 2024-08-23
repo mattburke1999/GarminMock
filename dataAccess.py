@@ -33,7 +33,7 @@ class DataAccess:
 
     def get_new_account_id(self):
         with self.connect_to_postgres() as cnxn:
-            query = 'select max(AccountId) as max from public.accounts'
+            query = 'select max(id) as max from public.accounts'
             df = pd.read_sql_query(query, cnxn)
         if len(df)==0 or df.iloc[0]['max'] is None:
             return 1
@@ -49,10 +49,10 @@ class DataAccess:
     def register_user(self, firstname, lastname, userid, password):
         with self.connect_to_postgres() as cnxn:          
             query = '''
-                insert into public.accounts("id", "firstname", "lastname", "userid", "password", "creationdate")
-                values(%s,%s,%s,%s,%s, current_timestamp)    
+                insert into public.accounts("firstname", "lastname", "userid", "password", "creationdate")
+                values(%s,%s,%s,%s, current_timestamp)    
             '''
-            params = [self.get_new_account_id(), firstname, lastname, userid, self.hash_password(password)]
+            params = [firstname, lastname, userid, self.hash_password(password)]
             cnxn.cursor().execute(query, params)
             cnxn.commit()
         return
@@ -175,7 +175,7 @@ class DataAccess:
     
     def search_activities_for_editing(self, date, title, accountid):
         with self.connect_to_postgres() as cnxn:
-            query = 'SELECT * from public.search_activity_by_date(%s, %s, %s)'
+            query = 'SELECT * from public.search_activities_for_edit(%s, %s, %s)'
             df = pd.read_sql_query(query, cnxn, params=[date, title, accountid])
         return df
     
