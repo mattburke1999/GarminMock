@@ -134,7 +134,7 @@ function unmerge_activity_final() {
         },
         error: function(error) {
             console.error('Error unmerging activity');
-            console.log(error.responseText);
+            console.log(error);
             closeUnMergeConfirmation();
             alert('Error unmerging activity');
         }

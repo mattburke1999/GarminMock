@@ -201,7 +201,7 @@ function display_search_results(activity_list) {
         let sport = row.insertCell(4);
         let time = row.insertCell(5);
         let distance = row.insertCell(6);
-        checkbox.innerHTML = `<input type="checkbox" onclick='select_row_checkbox(event, undefined, this.parentElement)' name="activity_id" value=" ${activity['activity_id']}">`;
+        checkbox.innerHTML = `<input type="checkbox" onclick='select_row_checkbox(event, undefined, this.parentElement)' name="activity_id" value="${activity['activity_id']}">`;
         checkbox.classList.add('checkbox');
         title.innerHTML = activity['activity_title'];
         title.classList.add('search-result-activity-title');
@@ -315,8 +315,6 @@ function merge_check() {
 }
 
 function merge_activities() {
-    console.log(activity1.activity_id);
-    console.log(activity2.activity_id);
     $.ajax({
         url: '/merge_activities',
         type: 'POST',
@@ -326,7 +324,7 @@ function merge_activities() {
             activity2: activity2.activity_id
         }),
         success: function(response) {
-            closeMergeActivities();
+            window.location.reload();
         },
         error: function(response) {
             console.log(response.error);

@@ -238,7 +238,7 @@ class DataAccess:
                 cursor.execute('select merged_activity_id from merged_activities where activity1_id = %s and activity2_id = %s', 
                     (activity1_id, activity2_id))
                 results = cursor.fetchone()
-        return results
+        return results[0] if results else None
     
     def mark_activity_as_invisible(self, activity_id, cnxn):
         with cnxn.cursor() as cursor:
