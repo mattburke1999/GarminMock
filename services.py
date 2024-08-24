@@ -281,7 +281,7 @@ def reactivate_merged_activity(merged_activity_id, activity1_id, activity2_id):
             da.mark_activity_as_invisible(activity2_id, cnxn)
             da.mark_activity_as_visible(merged_activity_id, cnxn)
             cnxn.commit()
-        return (True, '')
+        return (True, merged_activity_id)
     except Exception as e:
         return (False, str(e))
     
@@ -315,7 +315,7 @@ def merge_activities_process(activity1_id, activity2_id):
             da.mark_activity_as_invisible(activity1_id, cnxn)
             da.mark_activity_as_invisible(activity2_id, cnxn)
             cnxn.commit()
-        return (True, '')
+        return (True, new_activity_id)
     except Exception as e:
         return (False, str(e))
     

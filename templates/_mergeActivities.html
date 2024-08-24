@@ -7,6 +7,16 @@
         <button onclick='closeMergeConfirmation()'>No, Cancel</button>
     </div>
 </div>
+<div id='mergeSuccess' class="modal-backdrop" style='display:none;'>
+    <div class="merge-success">
+        <input type='hidden' id='merged_activity_id' value=''>
+        <h1>Activities Merged Successfully</h1>
+        <h2>What would you like to do next?</h2>
+        <button onclick='navigate_to_activity()'>View Merged Activity</button>
+        <button onclick='navigate_to_home()'>Return to the Home Page</button>
+        <button onclick='full_reload_page()'>Continue Editing Activities</button>
+    </div>
+</div>
 <div id='mergeActivities' class='modal-backdrop' style='display:none;'>
     <div class='merge-activities'>
         <h1 class='merge-title'>Merge Activities</h1>

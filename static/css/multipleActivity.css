@@ -64,6 +64,7 @@ body {
 .search-options button, 
 .merge-confirmation button, 
 .merge-activities button,
+.merge-success button,
 .unmerge-btn {
     margin: 10px;
     padding: 10px;
@@ -95,6 +96,7 @@ body {
 .stats-button2,
 .merge-confirmation button,
 .merge-activities button,
+.merge-success button,
 .unmerge-btn{
     background-color: #2A75B4;
     color: white;
@@ -133,20 +135,7 @@ body {
 .search-result-distance {
     width: 11%;
 }
-.merge-confirmation {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-content: center;
-    align-items: center;
-    align-self: center;
-    height: fit-content;
-    width: 67%;
-    margin: auto;
-    background-color: #fff;
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-    border-radius: 5px;
-}
+
 .bottomModalContainer {
     position: relative;
     display: flex;
@@ -170,7 +159,22 @@ body {
     border-radius: 10px;
     transition: all 0.3s ease;
 }
-.merge-activities{
+
+.merge-confirmation, .merge-success {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    align-self: center;
+    height: fit-content;
+    width: 67%;
+    margin: auto;
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+.merge-activities {
     display: flex;
     justify-content: center;
     flex-direction: column;

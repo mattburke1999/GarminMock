@@ -106,7 +106,7 @@ def check_login(f):
         return f(*args, **kwargs)
     return decorated_function
 
-def show_edit_form():
+def show_edit_page():
     return render_template('editPage.html')
 
 def search_activities_for_editing(input, input_type):
@@ -126,7 +126,7 @@ def merge_activities(activity1, activity2):
     result = merge_activities_process(activity1, activity2)
     if not result[0]:
         return make_response(jsonify({'error': result[1]}), 400)
-    return make_response(jsonify({'success': ''}), 200)
+    return make_response(jsonify({'success': result[1]}), 200)
 
 def unmerge_check(merged_activity_id):
     result = check_unmerge_process(merged_activity_id)

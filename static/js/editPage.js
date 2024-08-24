@@ -62,14 +62,6 @@ function open_merge_modal() {
     localStorage.setItem('activity2', JSON.stringify(activity2));
     document.body.classList.add('hidden');
 }
-window.onload = function() {
-    // save the state of the modal
-    if (localStorage.getItem('mergeModalDisplayed') === 'true') {
-        activity1 = JSON.parse(localStorage.getItem('activity1'));
-        activity2 = JSON.parse(localStorage.getItem('activity2'));
-        open_merge_modal();
-    }
-};
 
 function show_search_inputs(input_type, div_id, button) {
     var inputs = document.getElementById(div_id).getElementsByTagName('input');
@@ -314,6 +306,28 @@ function merge_check() {
     });
 }
 
+function navigate_to_activity() {
+    let merged_activity_id = document.getElementById('merged_activity_id').value;
+    window.location.href = `/activity/${merged_activity_id}`;
+}
+
+function navigate_to_home() {
+    window.location.href = '/';
+}
+
+function full_reload_page() {
+    localStorage.clear();
+    window.location.reload();
+}
+
+function display_merge_success(merged_activity_id) {
+    let modal = document.getElementById('mergeSuccess');
+    let input = document.getElementById('merged_activity_id');
+    input.value = merged_activity_id;
+    modal.style.display = 'flex';
+    document.body.classList.add('no-scroll');
+}
+
 function merge_activities() {
     $.ajax({
         url: '/merge_activities',
@@ -324,7 +338,8 @@ function merge_activities() {
             activity2: activity2.activity_id
         }),
         success: function(response) {
-            window.location.reload();
+            closeMergeActivities();
+            display_merge_success(response.success);
         },
         error: function(response) {
             console.log(response.error);

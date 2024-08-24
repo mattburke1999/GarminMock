@@ -2,6 +2,20 @@
 {% block title %}Edit{% endblock %}
 {% block head %}
     <script src="{{ url_for('static', filename='js/editPage.js') }}"></script>
+    <script>
+        window.onload = function() {
+            // save the state of the modal
+            if (localStorage.getItem('mergeModalDisplayed') === 'true') {
+                activity1 = JSON.parse(localStorage.getItem('activity1'));
+                activity2 = JSON.parse(localStorage.getItem('activity2'));
+                open_merge_modal();
+            }
+        };
+
+        window.onbeforeunload = function() {
+            localStorage.clear();
+        };
+    </script>
 {% endblock %}
 {% block body %}
     {% include '_mergeActivities.html' %}
