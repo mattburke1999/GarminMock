@@ -406,7 +406,6 @@ button:hover {
     margin: 20px;
 }
 .modal-backdrop {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -415,6 +414,52 @@ button:hover {
     background-color: rgba(0, 0, 0, 0.7);
     z-index: 999;
 }
+.loading2 {
+    display: flex;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 33%;
+    height: 33%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+}
+.loading2 h1 {
+    font-size: 25px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-right: 0;
+    margin-block-start: 0;
+}
+.loading2 h1::after {
+    content: '...';
+    animation: dots 1s steps(3, end) infinite;
+    display: inline-block;
+    width: 1.5em; /* Reserve space for 3 dots */
+    text-align: left;
+}
+
+@keyframes dots {
+    0%, 20% {
+        content: '';
+    }
+    40% {
+        content: '.';
+    }
+    60% {
+        content: '..';
+    }
+    80%, 100% {
+        content: '...';
+    }
+}
+
 .no-scroll {
     overflow: hidden;
 }
@@ -637,7 +682,7 @@ a {
     padding: 5px;
     font-family: 'Courier New', Courier, monospace;
 }
-.titleName {
+.titleName, .titleName2 {
     font-size: 18px;
     text-decoration: underline;
     font-family: 'Courier New', Courier, monospace;

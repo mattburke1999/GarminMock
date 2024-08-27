@@ -27,17 +27,34 @@ function clearTBody(activtyElement){
     tbody.innerHTML = '';
 }
 
-function closeMergeActivities() {
-    let activty1 = document.getElementById('merge-activity1')
-    let activty2 = document.getElementById('merge-activity2')
-    clearTBody(activty1);
-    clearTBody(activty2);
-    let mergeActivitiesModal = document.getElementById('mergeActivities');
-    mergeActivitiesModal.style.display = 'none';
+function closeInnerMergeActivities() {
+    let activity1 = document.getElementById('merge-activity1')
+    let activity2 = document.getElementById('merge-activity2')
+    clearTBody(activity1);
+    clearTBody(activity2);
+    let mergeActivities = document.getElementById('mergeActivities').getElementsByClassName('merge-activities')[0];
+    mergeActivities.style.display = 'none';
     localStorage.removeItem('mergeModalDisplayed');
-    document.body.classList.remove('hidden');
     clearSelectedRows();
 }
+
+function closeMergeActivityModal() {
+    let mergeActivities = document.getElementById('mergeActivities');
+    let innerMergeActivities = mergeActivities.getElementsByClassName('merge-activities')[0];
+    mergeActivities.style.display = 'none';
+    innerMergeActivities.style.display = 'flex'; //reset to default
+    document.body.classList.remove('hidden');
+}
+
+function toggleDisplayLoading() {
+    let loading = document.getElementById('mergeActivities').getElementsByClassName('loading2')[0];
+    if (loading.style.display !== 'flex') {
+        loading.style.display = 'flex';
+    } else {
+        loading.style.display = 'none';
+    }
+}
+
 function insert_row_data_into_table(table, row_data) {
     let tbody = table.getElementsByTagName('tbody')[0];
     tbody.innerHTML = '';
@@ -292,9 +309,6 @@ function displayMergeConfirmation(confirm_data) {
 
 function merge_check() {
     let activity_data = getSelectedRowData_merge();
-
-    
-
     activity1 = activity_data[0];
     activity2 = activity_data[1];
     $.ajax({
@@ -343,6 +357,8 @@ function display_merge_success(merged_activity_id) {
 }
 
 function merge_activities() {
+    closeInnerMergeActivities();
+    toggleDisplayLoading();
     $.ajax({
         url: '/merge_activities',
         type: 'POST',
@@ -352,12 +368,14 @@ function merge_activities() {
             activity2: activity2.activity_id
         }),
         success: function(response) {
-            closeMergeActivities();
+            toggleDisplayLoading();
+            closeMergeActivityModal();
             display_merge_success(response.success);
         },
         error: function(response) {
+            toggleDisplayLoading();
+            closeMergeActivityModal();
             console.log(response.error);
-            closeMergeActivities();
             alert('Error merging activities');
         }
     });
