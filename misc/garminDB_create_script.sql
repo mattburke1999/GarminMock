@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS public.merged_activities
     CONSTRAINT merged_activities_merged_activity_id_fkey FOREIGN KEY (merged_activity_id)
         REFERENCES public.raw_garmin_data_session (activity_id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION -- TODO: add a trigger to delete the record from this table, and mark activity1 and activity2 as visible
+        ON DELETE NO ACTION
 );
 
 CREATE TABLE IF NOT EXISTS public.raw_garmin_data_laps
@@ -639,3 +639,47 @@ BEGIN
 END;
 $BODY$;
 
+-- 4. Trigger Functions ==================================================================
+
+CREATE OR REPLACE FUNCTION public.handle_activity_delete()
+    RETURNS trigger
+    LANGUAGE 'plpgsql'
+    COST 100
+    VOLATILE NOT LEAKPROOF
+AS $BODY$
+begin
+
+	-- deleted activity = activity1/2 and merged_activity is not visible
+	-- delete the merged_activity from session, laps, and records
+	-- and then delete the record from merged_activity
+	drop table if exists merged_activity;
+	
+	create temp table merged_activity as
+	select merged_activity_id as "activity_id"
+	from merged_activities as "m"
+	join raw_garmin_data_session as "s" on "s".activity_id = "m".merged_activity_id and not "s".is_visible
+	where (activity1_id = old.activity_id or activity2_id = old.activity_id);
+	
+	delete from raw_garmin_data_session
+	where activity_id in (select activity_id from merged_activity);
+	
+	delete from raw_garmin_data_laps
+	where activity_id in (select activity_id from merged_activity);
+	
+	delete from raw_garmin_data_records
+	where activity_id in (select activity_id from merged_activity);
+	
+	delete from merged_activities
+	where merged_activity_id in (select activity_id from merged_activity);
+	
+RETURN OLD;
+END;
+$BODY$;
+
+-- 5. Triggers ==================================================================
+
+CREATE OR REPLACE TRIGGER on_activity_delete
+    AFTER DELETE
+    ON public.raw_garmin_data_session
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_activity_delete();
