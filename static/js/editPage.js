@@ -264,10 +264,13 @@ function getSelectedRowData_merge() {
             'start_time': cells[3].innerHTML,
             'display_sport': cells[4].innerHTML,
             'total_time': cells[5].innerHTML,
-            'total_distance': cells[6].innerHTML
+            'total_distance': cells[6].innerHTML,
+            'date_parsed': new Date(cells[3].innerHTML),
         };
         activity_data.push(data);
     });
+    // sort by date asc
+    activity_data.sort((a, b) => a.date_parsed - b.date_parsed);
     return activity_data;
 }
 function displayMergeConfirmation(confirm_data) {
@@ -289,6 +292,8 @@ function displayMergeConfirmation(confirm_data) {
 
 function merge_check() {
     let activity_data = getSelectedRowData_merge();
+
+    
 
     activity1 = activity_data[0];
     activity2 = activity_data[1];
