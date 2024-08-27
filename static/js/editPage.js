@@ -21,18 +21,27 @@ function closeMergeConfirmation() {
     localStorage.removeItem('mergeModalDisplayed');
     document.body.classList.remove('hidden');
 }
+
+function clearTBody(activtyElement){
+    let tbody = activtyElement.getElementsByTagName('tbody')[0];
+    tbody.innerHTML = '';
+}
+
 function closeMergeActivities() {
+    let activty1 = document.getElementById('merge-activity1')
+    let activty2 = document.getElementById('merge-activity2')
+    clearTBody(activty1);
+    clearTBody(activty2);
     let mergeActivitiesModal = document.getElementById('mergeActivities');
-    let mergeActivities = mergeActivitiesModal.getElementsByClassName('merge-activities')[0];
-    mergeActivities.innerHTML = '';
     mergeActivitiesModal.style.display = 'none';
     localStorage.removeItem('mergeModalDisplayed');
     document.body.classList.remove('hidden');
+    clearSelectedRows();
 }
 function insert_row_data_into_table(table, row_data) {
     let tbody = table.getElementsByTagName('tbody')[0];
     tbody.innerHTML = '';
-    let row = table.insertRow();
+    let row = tbody.insertRow();
     let activity_id = row.insertCell(0);
     let title = row.insertCell(1);
     let description = row.insertCell(2);
