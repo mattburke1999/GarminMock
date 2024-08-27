@@ -8,6 +8,7 @@ load_dotenv()
 import json
 import psycopg2
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 import traceback
 
 def connect_to_postgres():
@@ -87,7 +88,11 @@ def process_fit_file(filePath, folder, recordType, lap_activity_id = None):
             record_df = adjust_columns(record_df, recordType)
         else:
             record_df = fix_columns_record_df(record_df)
-        if recordType == 'session':     
+            
+        record_df['accountid'] = 1 # hardcoded for now, but will change to an environment variable later
+        if recordType == 'session':
+            record_df['is_visible'] = True
+            record_df['is_merged'] = False 
             return record_df, activity_id, activity_id_temp
         else:
             return record_df
@@ -110,35 +115,36 @@ def create_postgres_engine():
     # Create and return the SQLAlchemy engine
     engine = create_engine(connection_string)
     return engine
-def insert_into_sessions(df):
-    engine = create_postgres_engine()
-    # Use the session to insert data
-    df.to_sql('raw_garmin_data_session', engine, if_exists='append', index=False, method='multi')
-    engine.dispose()
-    return
-def insert_into_laps(df):
-    engine = create_postgres_engine()
-    
-    df.to_sql('raw_garmin_data_laps', engine, if_exists='append', index=False, method='multi')
-    engine.dispose()
-    return    
 
-def insert_into_records(df):
-    engine = create_postgres_engine()
-    
-    df.to_sql('raw_garmin_data_records', engine, if_exists='append', index=False, method='multi')
-    engine.dispose()
+def create_session(engine):
+    # Create a session
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    return session
+
+def insert_data_frame(df, table_name, cnxn):
+    # add inserted_time and last_updated_time right before inserting
+    # and conver times
+    df['inserted_time'] = pd.to_datetime('now')
+    df['last_updated_time'] = pd.to_datetime('now')
+    df = change_times(df, table_name != 'records')
+    # Use the session to insert data
+    df.to_sql(f'raw_garmin_data_{table_name}', con=cnxn, if_exists='append', index=False, method='multi')
     return
 
 def change_times(df, start_time=True):
     if start_time:
         df['start_time'] = pd.to_datetime(df['start_time']).dt.tz_localize('UTC')
     df['timestamp'] = pd.to_datetime(df['timestamp']).dt.tz_localize('UTC')
+    df['inserted_time'] = pd.to_datetime(df['inserted_time']).dt.tz_localize('UTC')
+    df['last_updated_time'] = pd.to_datetime(df['last_updated_time']).dt.tz_localize('UTC')
 
     # Now convert them to 'America/Chicago'
     if start_time:
         df['start_time'] = df['start_time'].dt.tz_convert('America/Chicago')
     df['timestamp'] = df['timestamp'].dt.tz_convert('America/Chicago')
+    df['inserted_time'] = df['inserted_time'].dt.tz_convert('America/Chicago')
+    df['last_updated_time'] = df['last_updated_time'].dt.tz_convert('America/Chicago')
     return df
 
 if __name__ == '__main__':
@@ -152,35 +158,50 @@ if __name__ == '__main__':
             session_df, activity_id, old_activity_id = process_fit_file(filePath, folder, 'session')
             if not session_df.empty:
                 print(f'session processed for {file}')
-                session_df = change_times(session_df)
             else:
                 print(f'Error1 with  session {file}')
                 break
             lap_df = process_fit_file(filePath, folder, 'lap', activity_id)
             if not lap_df.empty:
                 print(f'lap processed for {file}')
-                lap_df = change_times(lap_df)
             else:
                 print(f'Error1 with lap {file}')
                 break
             record_df = process_fit_file(filePath, folder, 'record', activity_id)
             if not record_df.empty:
                 print(f'record processed for {file}')
-                record_df = change_times(record_df, False)
             else:
                 print(f'Error1 with record {file}')
                 break
             if activity_id != old_activity_id:
                 os.rename(filePath, filePath.replace(f'activitie_{old_activity_id}', f'activitie_{activity_id}'))
                 print(f'file renamed for {file}')
-            insert_into_sessions(session_df)
-            print(f'session inserted for {file}')
-            insert_into_laps(lap_df)
-            print(f'lap inserted for {file}')
-            insert_into_records(record_df)
-            print(f'record inserted for {file}')
         except:
-            print(f'Error with {file}')
+            print(f'Error processing data for {file}')
             print(traceback.format_exc())
             break
+        try:
+            engine = create_postgres_engine()
+            sqlalchemy_session = create_session(engine)
+            with engine.begin() as cnxn:
+                insert_data_frame(session_df, 'session', cnxn)
+                print(f'session inserted for {file}')
+                insert_data_frame(lap_df, 'laps', cnxn)
+                print(f'lap inserted for {file}')
+                insert_data_frame(record_df, 'records', cnxn)
+                print(f'record inserted for {file}')
+            sqlalchemy_session.commit()
+        except:
+            sqlalchemy_session.rollback()
+            print(f'Error inserting data for {file}')
+            print(traceback.format_exc())
+            break
+        finally:
+            sqlalchemy_session.close()
+            engine.dispose()        
+        # move the file to a different folder
+        new_folder = r"C:\Users\mattb\OneDrive\Documents\LoginTEST\garmin data\Uploaded Lap and Session\uploaded_via_pyscript"
+        new_file_path = os.path.join(new_folder, file)
+        os.rename(filePath, new_file_path)
+        print(f'file moved for {file}')
         print('\n')

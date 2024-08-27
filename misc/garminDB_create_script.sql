@@ -118,6 +118,8 @@ CREATE TABLE IF NOT EXISTS public.raw_garmin_data_session
     accountid integer,
     is_visible boolean DEFAULT true,
     is_merged boolean DEFAULT false,
+    inserted_time timestamp without time zone DEFAULT now(),
+    last_updated_time timestamp without time zone DEFAULT now(),
     CONSTRAINT activity_id_pk PRIMARY KEY (activity_id),
     CONSTRAINT raw_garmin_data_session_accountid_fkey FOREIGN KEY (accountid)
         REFERENCES public.accounts (id) MATCH SIMPLE
@@ -195,6 +197,8 @@ CREATE TABLE IF NOT EXISTS public.raw_garmin_data_laps
     unknown_155 text COLLATE pg_catalog."default",
     unknown_145 text COLLATE pg_catalog."default",
     accountid integer,
+    inserted_time timestamp without time zone DEFAULT now(),
+    last_updated_time timestamp without time zone DEFAULT now(),
     CONSTRAINT fk_laps_session_activity_id FOREIGN KEY (activity_id)
         REFERENCES public.raw_garmin_data_session (activity_id) MATCH SIMPLE
         ON UPDATE CASCADE
@@ -217,6 +221,8 @@ CREATE TABLE IF NOT EXISTS public.raw_garmin_data_records
     cadence double precision,
     activity_id text COLLATE pg_catalog."default",
     accountid integer,
+    inserted_time timestamp without time zone DEFAULT now(),
+    last_updated_time timestamp without time zone DEFAULT now(),
     CONSTRAINT fk_records_session_activity_id FOREIGN KEY (activity_id)
         REFERENCES public.raw_garmin_data_session (activity_id) MATCH SIMPLE
         ON UPDATE CASCADE
