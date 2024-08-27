@@ -42,6 +42,7 @@ class DataTransform:
         df['duration'] = df['total_time'].apply(lambda x: self.time_seconds_to_string(x))
         df['elapsed time'] = df['total_elapsed_time'].apply(lambda x: self.time_seconds_to_string(x))
         df['pace'] = df['pace'].apply(lambda x: self.time_seconds_to_string(x))
+        df['best pace'] = df['best pace'].apply(lambda x: self.time_seconds_to_string(x))
         # select only the columns we want and reorder them
         df = df[['lap', 'distance', 'duration', 'elapsed time', 'pace', 'best pace', 'avg hr', 'max hr', 'avg cadence', 'max cadence', 'steps', 'avg stride length', 'calories', 'total ascent', 'total descent', 'activity_id']]
         lap_list = [df[df['activity_id'] == activity_id] for activity_id in activity_id_list]
