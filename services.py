@@ -8,6 +8,7 @@ import redis
 from queue import Queue
 import pandas as pd
 from numpy import array_split
+import traceback
 
 calendar.setfirstweekday(calendar.SUNDAY)
 # redis_cnxn = redis.Redis(host='localhost', port=6379, db=0, password = environ.REDIS_PASSWORD)
@@ -288,6 +289,7 @@ def reactivate_merged_activity(merged_activity_id, activity1_id, activity2_id):
 def merge_activities_process(activity1_id, activity2_id):
     try:
         # this was made based off 2 running activities
+        # this might not work if activity1[start_time] > activity2[start_time]
         # this might not work for other activities
         # this definitely won't work for 2 activities with different sports
         da = DataAccess(current_app.config)
@@ -295,29 +297,23 @@ def merge_activities_process(activity1_id, activity2_id):
         if merged_activity_id is not None:
             # if the activites were previously merged, and reversed back to normal, we have the merged actvity saved still
             return reactivate_merged_activity(merged_activity_id, activity1_id, activity2_id)
-        record1 = da.get_raw_record_by_activity_id(activity1_id, session['accountid'])
-        session1 = da.get_raw_session_by_activity_id(activity1_id, session['accountid'])
-        lap1 = da.get_raw_lap_by_activity_id(activity1_id, session['accountid'])
-        record2 = da.get_raw_record_by_activity_id(activity2_id, session['accountid'])
-        session2 = da.get_raw_session_by_activity_id(activity2_id, session['accountid'])
-        lap2 = da.get_raw_lap_by_activity_id(activity2_id, session['accountid'])
+        session1, lap1, record1 = da.get_all_raw_data_for_activity_id(activity1_id, session['accountid'])
+        session2, lap2, record2 = da.get_all_raw_data_for_activity_id(activity2_id, session['accountid'])
         new_activity_id = da.generate_new_activity_id()
+        print(f'ACTIVITY ID: {new_activity_id}')
         new_temp_id = da.generate_new_temp_id()
         new_records = dt.merge_records(record1, record2, new_activity_id)
         new_laps = dt.records_to_laps(new_records, session1, lap1, lap2, new_activity_id)
         new_session = dt.laps_to_session(new_laps, new_records, session1, session2, new_activity_id, new_temp_id)
         new_laps = dt.adjust_lap_columns(new_laps) # change column types to str
-        with da.connect_to_postgres() as cnxn:
-            da.insert_dataframe('session', new_session, cnxn)
-            da.insert_dataframe('laps', new_laps, cnxn)
-            da.insert_dataframe('records', new_records, cnxn)
-            da.insert_merge_activity_history(new_activity_id, activity1_id, activity2_id, cnxn)
-            da.mark_activity_as_invisible(activity1_id, cnxn)
-            da.mark_activity_as_invisible(activity2_id, cnxn)
-            cnxn.commit()
-        return (True, new_activity_id)
     except Exception as e:
+        print(traceback.format_exc())
         return (False, str(e))
+    inserted, error = da.insert_merged_activity(new_session, new_laps, new_records, new_activity_id, activity1_id, activity2_id)
+    if not inserted:
+        print(f'ERROR: {error}')
+        return (False, error)
+    return (True, new_activity_id)    
     
 def check_unmerge_process(merged_activity_id):
     # TODO: check if merged activity has been edited since it was merged

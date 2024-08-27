@@ -2,7 +2,6 @@ import psycopg2
 import bcrypt
 import json
 import pandas as pd
-import uuid
 
 class DataAccess:
     def __init__(self, environ, redis_cnxn=None, ):
@@ -139,6 +138,8 @@ class DataAccess:
         return
     
     def get_activity_by_id(self, activity_id, accountid):
+        print(f'ACTIVITY ID: {activity_id}')
+        print(f'ACCOUNT ID: {accountid}')
         with self.connect_to_postgres() as cnxn:
             query = 'select * from session_info(%s, null, null, null, %s)'
             session_info = pd.read_sql_query(query, cnxn, params=[activity_id, accountid])
@@ -186,7 +187,7 @@ class DataAccess:
     
     def generate_new_activity_id(self):
         with self.connect_to_postgres() as cnxn:
-            query = 'select max(activity_id) as max from session_info()'
+            query = 'select max(activity_id) as max from raw_garmin_data_session'
             df = pd.read_sql_query(query, cnxn)
         if len(df)==0 or df.iloc[0]['max'] is None:
             return 1
@@ -255,4 +256,25 @@ class DataAccess:
                 set is_visible = true
                 where activity_id = %s
             ''', (activity_id,))
+            
+    def insert_merged_activity(self, new_session, new_laps, new_records, new_activity_id, activity1_id, activity2_id):
+        try:
+            with self.connect_to_postgres() as cnxn:
+                self.insert_dataframe('session', new_session, cnxn)
+                self.insert_dataframe('laps', new_laps, cnxn)
+                self.insert_dataframe('records', new_records, cnxn)
+                self.insert_merge_activity_history(new_activity_id, activity1_id, activity2_id, cnxn)
+                self.mark_activity_as_invisible(activity1_id, cnxn)
+                self.mark_activity_as_invisible(activity2_id, cnxn)
+            cnxn.commit()
+            return (True, None)
+        except Exception as e:
+            cnxn.rollback()
+            return (False, str(e))
+            
+    def get_all_raw_data_for_activity_id(self, activity_id, accountid):
+        session = self.get_raw_session_by_activity_id(activity_id, accountid)
+        lap = self.get_raw_lap_by_activity_id(activity_id, accountid)
+        record = self.get_raw_record_by_activity_id(activity_id, accountid)
+        return session, lap, record
                 
